@@ -62,3 +62,4 @@ agent_created: true
 - `references/origin-and-follow.md` —— `origin` 语义、跟随与抑制回发、两层闸门、来源随命令同行、前端探针硬判据。
 - `references/backend-ingress-rules.md` —— 入口分层纪律、只读查询补基准、跨链路语义换算、XYZ→关节角互证、配置真值边界、大重构流程。
 - `references/acceptance-scripts.md` —— 验收脚本 6 条通则、假 FAIL 清单、探针静默失真、环境与状态卫生。
+- `references/robot-control-consumption.md` —— 消费侧独有：累积量≠增量（三条不变式 + 复位点）、离散手势静默窗口（丢弃非缓冲）、可达域≠包围盒；协议坑与验收级别交引用上两条。

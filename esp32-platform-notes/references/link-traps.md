@@ -77,16 +77,8 @@ export PROCESSOR_ARCHITECTURE=AMD64
 export ESP_IDF_VERSION=<ver>
 ```
 
-用 `runpy` 剥掉 `MSYSTEM` 后再调用 idf.py，可绕开包装器直接进主流程：
-
-```python
-import os, sys, runpy
-os.environ.pop('MSYSTEM', None)
-tools_dir = os.path.join(os.environ['IDF_PATH'], 'tools')
-sys.path.insert(0, tools_dir)
-sys.argv = ['idf.py'] + sys.argv[1:]
-runpy.run_path(os.path.join(tools_dir, 'idf.py'), run_name='__main__')
-```
+用 `runpy` 剥掉 `MSYSTEM` 后再调用 idf.py，可绕开包装器直接进主流程。
+完整包装器代码见 **`embedded-windows-toolchain/references/toolchain-setup.md`**「MSYSTEM 早退」B 节，此处不重复。
 
 烧录脚本的端口选择范式：用 IDF 自带 python（含 pyserial）扫描 COM 口，**动态识别而非硬编码**；端口列表打印到 stderr（终端可见），选定端口作为 stdout 末行供 `tail -1` 解析；交互终端下可手动选，非交互下取默认或首个可用口。不传端口时用内置默认值，传入则直接采用。
 

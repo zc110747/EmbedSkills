@@ -104,6 +104,9 @@ LR_IROM1 0x08000000 0x00200000
 - `<pCCUsed>6140000::V6.14::ARMCLANG</pCCUsed>`、`<uAC6>1</uAC6>`
 - **Thumb 必开**：`<Cads><uThumb>1</uThumb>` 且 `<Aads><thumb>1</thumb>`。
   旧工程若误设 `uThumb=0` 会生成非法 ARM 态代码（Cortex-M 只认 Thumb）。
+- **C 语言级别**：`<Cads>` 里补 `<uC99>1</uC99><uGnu>1</uGnu><v6Lang>5</v6Lang><v6LangP>5</v6LangP>`。
+  源码用了 `_Static_assert`（C11）或 C99 `[static N]` 数组参数时必须给到 C99/GNU 变体，
+  否则报的是**看不懂的语法错**（如 `expected expression`）。本项目实测该组合可编过这两者。
 - **IncludePath**（相对路径，随工程移动）：用户头目录 + HAL `Inc`（含 `Inc/Legacy`）
   + `Drivers/CMSIS/Include` + `sys_startup` + 各 `third_party/<lib>/src`。
 - **Define**（沿用 CMake，补齐缺失项）：芯片宏（`STM32<型号>xx`）、`USE_HAL_DRIVER`、
@@ -161,6 +164,62 @@ Keil 侧的特殊性在于：**`.` 文件全量入组会真的把代码链进去
 **验收红线**：HAL 入组 `.c` 数量应为**个位数~十几个**（按实际外设），不应是目录全量
 （H7 约 80+）；且 uvprojx 中 HAL 组文件数应等于 CMake 侧 HAL 源条数。
 
+### 六·B、第三方库里的 newlib 专有头（移植 ARMCLANG 的第二大障碍）
+
+现象：某个**第三方库头文件**（本项目是 `third_party/ssd1306/ssd1306.h`）里
+`#include <_ansi.h>`，报 `'_ansi.h' file not found`，并连带 `_BEGIN_STD_C` /
+`_END_STD_C` 未定义 —— **一个根因 4 个 error**，日志里看起来像"到处都是问题"。
+`_ansi.h` 是 **newlib 专有**，ARMCLANG 没有。
+
+判据：这类文件**不是可排除项**（它是产品的真依赖），必须改造。先确认用法范围：
+
+```bash
+grep -rn "_ansi\.h\|_BEGIN_STD_C\|_END_STD_C\|_U_\|_NOTHROW" third_party/
+```
+
+上游用这一对宏，通常只是要一个 `extern "C"` 守卫。**就地展开**，两条工具链行为等价：
+
+```c
+#include <stddef.h>
+#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+/* ... 声明 ... */
+#ifdef __cplusplus
+}
+#endif
+```
+
+改完必须**跑一次 GCC 双构回归**确认零差异 —— "为适配 A 工具链而改共用头"最容易在
+B 工具链上引入静默行为变化。
+
+⚠️ 与 `syscalls.c` 的区别要分清：那是**工程文件**（排除即可）；这是**第三方库的头**
+（排除不了，只能改）。同类需警惕的 newlib/POSIX 头：`<sys/stat.h>` `<sys/types.h>`
+`<unistd.h>` `<reent.h>`。
+
+### 六·C、栈/堆预算：两条工具链的默认值几乎必然不一致
+
+GCC 的 `.ld` 与 Keil 的 `startup_<part>.s` **各自保存一份** `Stack_Size` / `Heap_Size`，
+移植时极易只改一边。本项目实测差异：
+
+| | GCC（`.ld`） | Keil（`arm/startup_*.s`） | 处置 |
+|---|---|---|---|
+| Stack | 2 KB | **1 KB** | 对齐 → 2 KB |
+| Heap | 512 B | **0 B** | 对齐 → 512 B |
+
+⇒ 移植后**逐项核对这两个数**：
+
+```bash
+grep -nE "Stack_Size|Heap_Size" sys_startup/arm/*.s sys_startup/*.ld
+```
+
+不一致就以 GCC 侧为准改 Keil 侧。栈偏小只在"栈上格式化"类代码（`snprintf` + 栈缓冲，
+如本项目 `bsp_uart_printf`）里暴露，属**偶发、难查**的一类问题。
+
+判据：Keil 的 `ZI-data` 增量应恰好等于两处差值之和（本项目 +1536 = +1024 + 512），
+且 `.bin` 头部第 1 个字（初始 SP）随之抬升。
+
 ## 七、验收标准
 
 - [ ] `build_log.htm` 末行 `0 Error(s), 0 Warning(s)`
@@ -171,5 +230,11 @@ Keil 侧的特殊性在于：**`.` 文件全量入组会真的把代码链进去
 - [ ] HAL 源按需引入：HAL 组内 `.c` 为个位数~十几个（非目录全量），与 CMake 侧 HAL 源列表一一对应；
       新增外设时两侧同步补齐
 - [ ] `fromelf --info=totals` 的 ROM 大小与预期一致（与 CMake 侧同源集产物量级相当）
+- [ ] **栈/堆与 GCC 侧逐项一致**（`grep -nE "Stack_Size|Heap_Size"` 两侧对比），
+      且 `ZI-data` 增量 == 两处差值之和
+- [ ] 语言级别够用：工程用了 `_Static_assert`（C11）或 C99 `T f(int a[static N])` 时，
+      uvprojx 需 `uAC6=1` 且 C 级别给到 C99/GNU 变体（本项目 `uC99=1` + `uGnu=1` + `v6Lang=5`
+      实测可编过这两者）；否则会报 `expected expression` 一类莫名其妙的语法错
+- [ ] 第三方库**无 newlib 专有头依赖**（`grep -rn "_ansi\.h\|_BEGIN_STD_C" third_party/` 无命中）
 - [ ] 帧缓冲落在 AXI SRAM（ZI ≈ `N × W × H` 字节，与 `.framebuffer` 段一致）
 - [ ] 真机烧录/运行验证为可选后续（与 GCC 构建共用同一份源码逻辑）

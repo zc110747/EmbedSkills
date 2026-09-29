@@ -73,22 +73,8 @@ FreeRTOS heap / LwIP 池 / mbedTLS 池都在 SDRAM，任何 `xTaskCreate` 在 SD
 > 噪声中断的正解从来不是滤波，而是切断噪声源（上拉）+ 不让噪声进 ISR（自屏蔽）。
 > 给所有外部中断加「1s 速率看门狗」把风暴变成数字，是这类问题最划算的诊断投入。
 
-隔离层与容错层的代码形状：
-
-```c
-/* ISR 入口：立刻屏蔽本 line，避免噪声继续进中断 */
-EXTI->IMR &= ~TOUCH_EXTI_LINE_MSK;
-xSemaphoreGiveFromISR(s_touch_sem, &hp);
-
-/* 任务侧：轮询到抬手 + 去抖延时之后，重新武装 */
-void bsp_touch_irq_rearm(void)
-{
-    taskENTER_CRITICAL();
-    EXTI->PR  =  TOUCH_EXTI_LINE_MSK;    /* 先清挂起，避免立即重触发 */
-    EXTI->IMR |= TOUCH_EXTI_LINE_MSK;    /* 再重新武装 */
-    taskEXIT_CRITICAL();
-}
-```
+隔离层与容错层的代码形状（ISR 内屏蔽 + 任务侧 `bsp_touch_irq_rearm()` 重武装的
+完整代码）见 **`camera-and-display.md` §5.1**，此处不重复。
 
 **要把"中断风暴"从猜测变成数字**：在 1s 窗口内计数，超过阈值（如 1000/s）打一条
 WARNING，日志里就会出现 `46925/s` 这样的实测值——这是这类问题最划算的诊断投入。

@@ -185,13 +185,8 @@ CMake Error: The source "<新路径>/CMakeLists.txt" does not match the source "
 - 想让客户端拿到固定尺寸而设备原生是别的尺寸，**必须加 `videoscale`**，否则必然失败。
 - 协商上报要查**采集源 pad 的 src**（那里才是设备原生格式且一定有固定 caps）；查编码器 sink pad 常只拿到模板 caps（无 width/height）→ 解析静默失败、日志里什么都没有。
 - 协商结果**只在值变化时打印**；`start()` 与 `STATE_CHANGED` 两处都触发会导致同毫秒打两行。
-- 低延迟参数组（已验证可用）：
-
-  ```
-  ffplay -rtsp_transport tcp -fflags nobuffer -flags low_delay \
-         -probesize 32768 -analyzeduration 0 -framedrop \
-         rtsp://<host>:<port>/<path>
-  ```
+- 低延迟参数组（已验证可用，含"`-rtsp_flags nobuffer` 是错的"这一关键警告）：
+  **权威出处见 `soc-video-and-edge-ai/references/rtsp-agent.md`**，此处不重复。
 
   ⚠️ **不要加 `-rtsp_flags nobuffer`**：`rtsp_flags` 不接受该值，ffplay 直接 `Invalid argument` 退出、**窗口永远不出现**（`nobuffer` 属于 `-fflags`）。这是"ffplay 打不开"的头号原因。
 - 服务端配置关键项：允许推任意路径（否则报 `path '<id>' is not configured`）；传输方式与推流端一致（避免 UDP 乱序）；不落盘（不引入额外缓冲）。

@@ -49,11 +49,8 @@ binutils 2.43.1），链接即正常。
 
 ## 三、Zephyr 工程的 west 调用
 
-`west.exe` 不在 PATH 时不能直接 `west build`，必须走 python 模块：
-
-```bash
-python -m west build -b <board>/<soc> -d build -s .
-```
+`west.exe` 不在 PATH 时不能直接 `west build`，必须走 python 模块。
+完整命令与 `-b <board>/<soc>` 等约束见 **`zephyr-stm32-porting/references/build-and-toolchain.md`**。
 
 每个新 shell 需注入（`GNUARMEMB_TOOLCHAIN_PATH` 用实际安装路径）：
 
@@ -102,6 +99,55 @@ sys.path.insert(0, tools_dir)
 sys.argv = ['idf.py'] + sys.argv[1:]
 runpy.run_path(os.path.join(tools_dir, 'idf.py'), run_name='__main__')
 ```
+
+### 四.1 cmd 解析出的 PATH 才是对的（键名大小写重复陷阱）
+
+Windows 环境块里可能同时存在 `Path` 与 `PATH`：**cmd 取第一个**（含工具链），
+**CPython 的 `os.environ` 取最后一个**（宿主 shell 注入的、不含工具链）。症状极具欺骗性：
+
+- `.bat` 里 `where xtensa-esp32s3-elf-gcc` 能找到，直接调 cmake 也成功；
+- 但经 `idf.py` 调用时报 `...-gcc is not a full path and was not found in the PATH`，
+  且 `CMakeConfigureLog.yaml` 里能看到 cmake 在穷举猜编译器
+  （`Id flags: -Aa / -D__CLASSIC_C__ / --target=arm-arm-none-eabi;...`）。
+
+判定只需 20 行，别去读 `idf_tools.py`：在 cmd 侧把 `%PATH%` 显式导出给 python，比较两侧取值。
+
+```bat
+set "IDF_LAUNCH_PATH=%PATH%"
+"%IDF_PYTHON_ENV_PATH%\Scripts\python.exe" launcher.py %*
+```
+
+```python
+import os
+os.environ['PATH'] = os.environ.pop('IDF_LAUNCH_PATH')   # 用 cmd 的视图覆盖 CPython 的
+```
+
+另注意 `runpy.run_path()` 不像 `python idf.py` 那样把脚本目录加入 `sys.path`，
+需自己 `sys.path.insert(0, os.path.dirname(idf_py))`，否则报
+`ModuleNotFoundError: No module named 'python_version_checker'`。
+
+**凡"PATH 里明明有却找不到"的报错，第一件事查键名大小写重复。**
+
+### 四.2 `idf.py -> cmake -> esp_idf_size` 的中文编码往返
+
+`idf.py size` 的表格在中文 Windows 上会变成 `鈹?` 这类乱码：链路中有一环把 UTF-8 字节按
+cp936 解码再按 UTF-8 写回（数字仍可读、表格全毁）。输出重定向到文件时最容易复现。
+
+```bat
+chcp 65001 >nul 2>&1      REM 控制台代码页
+set "PYTHONUTF8=1"        REM 让 locale.getpreferredencoding() 返回 utf-8
+```
+
+两条都要加在激活环境那一层：**只加 `PYTHONUTF8=1` 实测无效，必须同时 `chcp 65001`**。
+去 ANSI 的工具务必按字节处理（`open(p,'rb')` + 字节级正则），不要 decode 再 encode。
+
+### 四.3 分区表与 flash mode 的两个反直觉点
+
+- `CONFIG_PARTITION_TABLE_CUSTOM=y` 需配 `CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"`，
+  csv 放工程根。16MB flash 无 OTA 时给 app 4M 足够（LVGL9 + 四套 Montserrat 约 570KB）。
+- `CONFIG_ESPTOOLPY_FLASHMODE_QIO=y` **不等于**最终模式：`CONFIG_ESPTOOLPY_FLASH_MODE_AUTO_DETECT=y`
+  时由 esptool 烧录时探测，`sdkconfig` 里派生的 `CONFIG_ESPTOOLPY_FLASHMODE="dio"` 属正常，
+  不是配置没生效，别照着改。
 
 ## 五、MSVC x64 环境拼装（PowerShell）
 

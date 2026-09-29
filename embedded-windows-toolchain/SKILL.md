@@ -24,10 +24,25 @@ GStreamer 依赖）共用的环境搭建、构建执行与结果判据。只保�
 | 完成判据 | 退出码 + 日志零 warning + 产物 mtime 变化，三者齐备才算构建成功 |
 | 缓存 | 工具链路径或拉取依赖变更后 `build/` 不可复用，删除重生成 |
 | 行尾/编码契约 | `.bat` 必须 CRLF + 纯 ASCII；C/C++ 源 UTF-8 需编译器开关；外部命令输出常为 GBK |
+| PATH 键名 | 环境块可能同时有 `Path` 和 `PATH`：cmd 取第一个、CPython 取最后一个 → "明明在 PATH 里却找不到" |
 | 路径风格 | 传给原生工具（cmake/ninja/cl.exe）的路径必须 Windows 风格；MSYS 的 `/tmp`、`/dev/null` 对原生工具不可见 |
 | 工具链版本 | 版本是构建输入的一部分；厂商预编译 `.a` 与 binutils 版本强耦合，不默认最新 |
 | 零警告 | Debug/Release 双构零警告是硬约束，不以 exit code 代替 |
 | 路径探测 | 安装位置从安装器清单或探测工具读取，禁止硬编码 |
+
+## 控制台与批处理陷阱（每条都伪装成"脚本坏了"）
+
+| 现象 | 根因 | 修法 |
+|---|---|---|
+| 长命令**无输出 + 被 SIGTERM** | 命令被 `\| tail`/`\| head` 包住，管道缓冲 ⇒ 上层只看到"长时间零输出"，按看门狗杀掉 | 长命令不走管道；解释器加 `-u` / `--unbuffered` |
+| 批处理在调用某命令后**静默结束、退出码 0** | 裸调 `.cmd`/`.bat`：子批处理**替换**父批处理，控制权不返回 | 每处调用加 `call`（含 shim、包装脚本、npm 装的 `.cmd`） |
+| `set` 进去的长字符串**少了字符** | `EnableDelayedExpansion` 下 `!` 启动延迟展开，吃掉到下一个 `!` 之间的字符 | 值里别用 `!`；或局部 `DisableDelayedExpansion` |
+| 长字符串取进变量被**截断** | `set /p` 上限 1023 字符；`for /f` 反引号内嵌引号会报"命令语法不正确" | 先落文件，再 `for /f "usebackq delims=" %%j in ("file")` |
+| `dir /s` 存在却**找不到文件** | 通配符只能出现在路径**最后一段** | 先枚举中间目录，再拼内层路径 |
+| `timeout 10 cmd` 报"无效语法" | PATH 上的 `timeout` 是 Windows 的 `TIMEOUT.EXE`，不是 coreutils | 用 `%SystemRoot%\System32\timeout.exe`，或先确认实际跑的是哪个程序 |
+| 从 Bash 调 `cmd //c` 被安全策略拦 | 宿主对 `cmd.exe` 的调用有校验，但**直接执行 `.bat` 可以** | 直接按路径执行 `.bat`，不要包一层 `cmd /c` |
+
+详细取证（含原始数字与复现步骤）见 `references/console-and-batch-traps.md`。
 
 ## 判据与反模式
 

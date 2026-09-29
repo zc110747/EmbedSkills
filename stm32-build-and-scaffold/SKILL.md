@@ -32,6 +32,8 @@ agent_created: true
 
 **Keil 侧的反向约定**：`syscalls.c`（GCC/newlib 垫片）**必须排除**；半主机抑制垫片（`__use_no_semihosting` + `_sys_exit`/`_ttywrch`）**必须保留**——两者方向相反，极易搞错。`uThumb=1`/`thumb=1` 必开（Cortex-M 只认 Thumb）。ARMCLANG 警告参数用**单横杠** `-Wno-...`。Keil 全量入组会真的链进代码（无 `--gc-sections` 兜底）。
 
+**两个易漏的"另一份数据"**：① 第三方库**头文件**里的 newlib 专有宏（`_ansi.h` / `_BEGIN_STD_C`）**不是可排除项** —— 就地展开成 `extern "C"` 守卫，改完**必须回归 GCC 双构**（共用头最容易在另一条工具链上静默变味）；② 两条工具链各存一份 `Stack_Size`/`Heap_Size`（`.ld` 与 `arm/startup_*.s`），移植后逐项对齐，栈偏小只在"栈上格式化"类代码里偶发暴露。
+
 ## 判据与反模式
 
 | 判据 | 反模式 |

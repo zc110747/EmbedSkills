@@ -52,4 +52,9 @@ agent_created: true
   编码判定、exFAT、U 盘与 FatFs 并发。
 - `references/cache-mpu-and-memory.md` — H7 内存域与 MPU region 草案、DMA 缓冲选址、
   ETH RX 选址、DTCM/Flash 可执行性与 H7 双 Bank 升级要点。
+- `references/lan8720a-rmii.md` — LAN8720A/RMII 以太网配置、I2C 总线锁死恢复、
+  SDRAM(FMC) 先初始化、F429 LCD 8080 与 GT911 触摸（指向 camera-and-display.md）。
+- `references/h7-flash-bootloader.md` — H7 内部 Flash 升级引擎：DTCM 不可执行、
+  双 Bank 擦写取指、RWW 只 stall 不 fault、两阶段长度擦除、跳转 App 序列。
+- `references/uart-physical-bridge.md` — UART 物理层与 CDC↔UART 透明桥踩坑。
 - 日志系统（环形缓冲、RTOS 双 TX 路径）以 `mcu-logging` 为准。
