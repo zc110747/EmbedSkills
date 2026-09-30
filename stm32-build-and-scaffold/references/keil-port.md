@@ -213,6 +213,12 @@ fromelf --text -s Objects/app.axf | grep -E "Image\\\$\\\$UPGRADE_RAM|Load\\\$\\
   Application/User/Core（main 等，**务必含半主机抑制垫片**）、
   Drivers/…_HAL_Driver（**按需 HAL `.c`**）、BSP/`<模块>`、Middlewares/`<lib>`。
   **`syscalls.c` 不在此列表；抑制垫片必须在此列表。**
+- **特性开关 / 可选源文件**（如调试探针，整份代码受 `#ifdef CAM_DIAGNOSTICS` 包裹）：
+  在 uvprojx 里**无条件列入**（让源列表与 CMake 的 `option()` 条件源集对齐），整份代码
+  用宏包裹。默认 `<Define>` 不定义该宏 → 编出**零符号空 TU**（实测 ARMCLANG 对空 TU 零
+  警告，`.o` 仅数百字节，`nm` 无符号）。启用时只在 `C/C++ (AC6) → Preprocessor Symbols →
+  Define` 加宏，**不动源文件列表**。⚠️ 别为"对齐"把该源从 uvprojx 删掉——那样开关打开时
+  还得同时改两处（源列表 + Define），容易漏。
 
 ## 五、UV4 命令行构建与日志解析
 
@@ -221,9 +227,14 @@ fromelf --text -s Objects/app.axf | grep -E "Image\\\$\\\$UPGRADE_RAM|Load\\\$\\
 ```
 
 - `-b` 批构建；`-j0` 不限并发；`-t` 指定 target；`-o` 写 HTML 日志。
-- **stdout 不一定回显**，判断成败靠 `build_log.htm` 末行：
+- **stdout 不一定回显**，判断成败靠日志末行：
   `"Objects\<target>.axf" - 0 Error(s), 0 Warning(s).`
-- 退出码 `0` = 成功，`2` = 有错误。
+- **⚠️ 退出码不可信**：UV4 是 GUI 子系统程序，从 Git Bash / CI 等非控制台环境启动会
+  **立即返回退出码 0 并在后台异步构建**（UV4 文档的"0=成功 / 2=错误"只在真正的控制台
+  前台运行时成立）。实测：命令 0.1 s 返回 0、`-o` 指定的日志**根本没生成**，而
+  `Objects/*.o`、`.axf` 的 mtime 在两秒后才更新 → 构建其实成功，但同样的机制会把真实
+  失败也谎报成 0。**可靠判据 = 日志末行 + `Objects/<target>.axf` 的 mtime 是否更新**；
+  找不到 `-o` 日志时，UV4 的默认构建日志落在 `MDK-ARM/Objects/<target>.build_log.htm`。
 - 尺寸：`fromelf --info=totals Objects\<target>.axf` → `Total ROM Size`（≈ `.bin` 大小）、
   `Total RW Size`（RW+ZI，含 AXI 帧缓冲）。
 - 产物：`Objects/<target>.axf` / `.hex` / `.bin`。
@@ -239,6 +250,7 @@ fromelf --text -s Objects/app.axf | grep -E "Image\\\$\\\$UPGRADE_RAM|Load\\\$\\
 | 分散加载 `EXPORT` 不生效 | ARMCLANG 不认 `_end` 等 | 别 EXPORT，排除 `syscalls.c` |
 | **烧录后串口无输出 / 程序停在 `BKPT`（调试器里看不出，编译链接却全过）** | **误删了半主机抑制垫片，半主机未抑制**；一旦有裸 `printf` 即链入半主机 | 恢复垫片（`__use_no_semihosting` + `_sys_exit`/`_ttywrch`），并用 `fromelf --text -c` 确认 `BKPT` 计数为 0 |
 | `UV4` 卡住不返回 | 误加 `-h` 或弹 GUI | 只用 `-b` 批模式，日志走 `-o` |
+| **UV4 秒退且退出码 0、却找不到日志（构建其实还在后台跑）** | GUI 程序脱离控制台（Git Bash / CI 启动） | 别信退出码；判据改用日志末行 + `Objects/*.axf` mtime，默认日志在 `Objects/<target>.build_log.htm` |
 | 设备解析失败 | DFP 版本/路径不对 | 装对 DFP 版本，确认 `PackID` |
 | `L6218E: Undefined symbol tusb_time_millis_api (referred from tusb.o)` | `CFG_TUSB_OS=OPT_OS_NONE` 下 TinyUSB 要求应用实现（见六·D） | 在 `bsp/` 里定义 `uint32_t tusb_time_millis_api(void){ return HAL_GetTick(); }` |
 | `L6218E: Undefined symbol Image$$XXX$$Base` | 区域符号名取自**执行域**标签，与 C 侧 `extern` 名不一致 | 用 `fromelf --text -s` 查真实符号名，或把执行域改名对齐 |
