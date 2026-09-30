@@ -86,6 +86,43 @@ static void cdc_task(void)
 }
 ```
 
+### 落地工具：`.clang-format`（自动化对齐，避免手改）
+
+本规范的缩进/括号是**机械性**规则，手写易漏。在仓库根放一份 `.clang-format`，
+用 `clang-format -i` 一键对齐（CI 或提交前跑）。注意 clang-format **23.x** 把
+`AllowShortIfStatementsOnASingleLine` / `AllowShortLoopsOnASingleLine` /
+`AllowShortBlocksOnASingleLine` 的 `Never` 改成了**布尔值**（`false`），写 `Never` 会报错。
+
+```yaml
+---
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 0            # 不折行，保留既有手工换行，最小化 diff
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: true   # if/for/while 开括号独立成行
+  AfterEnum: false              # enum { 与关键字同行（§2 例外）
+  AfterStruct: false            # struct { 与关键字同行（§2 例外）
+  AfterUnion: false
+  BeforeElse: true              # } else { -> } / else / {
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: false
+SpaceBeforeParens: ControlStatements
+PointerAlignment: Right
+SortIncludes: false
+IncludeBlocks: Preserve
+...
+```
+
+> 用前先 `clang-format --version` 确认大版本；本配置在 clang-format 23 验证通过。
+> 第三方目录（Drivers/third_party、ST 组件、CMSIS/启动文件）**不要**纳入格式化。
+
 ---
 
 ## §3 文件级静态变量：合并成结构体
