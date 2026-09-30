@@ -279,3 +279,24 @@ bool bsp_led_read(void);
 
 > 相关：`mcu-cpp-development`（C++ 侧的同类约定）、`stm32-build-and-scaffold`（工程骨架）、
 > `mcu-logging`（日志模块自身的静态状态组织）。
+
+---
+
+## §10 更新与同步（强制 · 凡改本 skill 必做）
+
+**本 skill（以及任何系统 skills `~/.workbuddy/skills/*/SKILL.md`）被修改后，
+"规则写入"的收尾步骤必须同步完成，否则视为未完成：**
+
+1. **改权威副本**：编辑 `~/.workbuddy/skills/mcu-code-style/SKILL.md`
+   （全局 `~/.workbuddy/skills/` 是**唯一权威副本**，所有编辑都在此做，不在别处改）。
+2. **同步到 EmbedSkills 仓库**（用户要求的"系统 skills 更新触发 EmbedSkills 同步"）：
+   `cp ~/.workbuddy/skills/mcu-code-style/SKILL.md /d/user_project/git/EmbedSkills/mcu-code-style/SKILL.md`
+3. **在 EmbedSkills 本地提交（不 push）**：
+   `cd /d/user_project/git/EmbedSkills && git add mcu-code-style/SKILL.md && git commit`
+   push 由用户自己处理（git push 不归我管）。
+
+- ⚠️ **`support_tools/sync_skills.sh` 覆盖不到本 skill**：该脚本只纳管 18 个 MCU 域 skill，
+  同步方向是 `全局 skills ⇄ 工程 .workbuddy/skills/ 镜像`，白名单里没有 `mcu-code-style`；
+  本 skill 走上面的 **EmbedSkills 直接 cp + commit** 流程，不要误用该脚本。
+- ✅ 验证：同步后 `diff -q` 两侧 SKILL.md 应一致。
+- 两个仓库（EmbedSkills / 各业务工程）均**只本地 commit、不 push**。
