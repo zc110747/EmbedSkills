@@ -243,6 +243,27 @@ description ≤ 150 字符，含触发词，第三人称
 能脚本化的写进 scripts/，不靠记忆
 ```
 
+### 4. 与系统 skills 保持同步（作者用）
+
+本仓是作者本地 `~/.workbuddy/skills/` 的**唯一版本化镜像**（一个仓覆盖所有工程；
+各工程**直接使用全局 skills**，不再在工程内维护 `.workbuddy/skills/` 镜像）。
+
+```bash
+cd EmbedSkills
+bash sync_skills.sh              # 全局 -> EmbedSkills（默认，刷新镜像）
+bash sync_skills.sh --check      # 只报漂移（0=一致, 1=有漂移）
+bash sync_skills.sh --list       # 打印纳管清单
+bash sync_skills.sh --prune      # 清理镜像侧冗余文件（全局已删的残留）
+bash sync_skills.sh --restore    # EmbedSkills -> 全局（换机 / 灾后恢复）
+```
+
+纳管范围**目录自动发现**（全局 skills 下每个顶层 skill 目录 + 顶层 `.md`），仅排除
+`README.md` / `.git` / `.workbuddy` —— 刻意**不做写死白名单**：旧版把 18 个名字硬编码，
+skill 改名/合并后清单全部失效、静默漏同步（2026-09-30 实测 18 个名字里 16 个已不存在）。
+
+> ⚠️ 沙箱/受限 shell 内**脚本批量删除**会被 `SIGTERM` 中断（stdout 也一起丢）→
+> `--prune` 请在真实终端执行，或让 Agent 逐条 `rm`。
+
 ---
 
 ## 规划
@@ -267,11 +288,15 @@ description ≤ 150 字符，含触发词，第三人称
       - 同步 `stm32-build-and-scaffold`：新增 armlink 分散加载三条硬语法与 TinyUSB 弱钩子（`keil-port.md` 240 → 399 行）
       - `mcu-comment-style` **改名并扩写为 `mcu-code-style`**：新增「文件级静态变量合并为结构体」「按暴露数量选接口粒度」「第三方代码不动只上报」三节
       - 全仓交叉引用同步改名（`mcu-cpp-development`、README、能力表）
+- [x] **2026-09-30** `sync_skills.sh` **入仓并改架构**（`EmbedSkills/sync_skills.sh`）
+      - 同步脚本从工程侧（`MCU-Agent/support_tools/`）迁到**本仓**，方向改为
+        `全局 ~/.workbuddy/skills/` ⇄ **EmbedSkills**；**取消工程级 `.workbuddy/skills/` 镜像**，
+        各工程直接使用全局 skills（一个仓覆盖多工程）。
+      - 纳管清单由**写死白名单改为目录自动发现**，根治"skill 改名/合并后静默漏同步"。
+      - 新增孤儿检测（`[仅镜像存在]`）、`--check`/`--list`/`--prune`/`--restore` 全通。
 
 ### 进行中 / 计划
 
-- [ ] **同步脚本入仓** —— 当前 `support_tools/sync_skills.sh` 在工程侧，**镜像白名单写死在脚本里**，
-      增删 Skill 后必须同步改脚本，否则新 Skill 不会被镜像。计划随仓携带并把白名单改为目录自动发现。
 - [ ] **安装脚本** —— 让「全量安装」从手抄 `for` 循环变成 `install.sh` / `install.bat`（Windows 侧纯 ASCII、pause-on-error）。
 - [ ] **CI 一致性校验** —— 提交时校验 frontmatter 完整性、description 字符数、`references/` 链接有效性。
 - [ ] **领域扩展** —— 边缘 AI 部署（ONNX / CMSIS-NN 量化链路）、嵌入式 Linux SOC（RK3568 摄像头/RTSP）方向仍偏薄。
