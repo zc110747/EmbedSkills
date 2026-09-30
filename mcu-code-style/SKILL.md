@@ -36,6 +36,7 @@ agent_created: true
 | 项 | 约定 | 示例 |
 |---|---|---|
 | 文件名 | 统一小写 | `bsp_log.c` / `sd_app.h` |
+| 目录名 | 统一小写，仅 `Drivers` 保留 STM 原大小写 | `app/` `bsp/` `sys_startup/`；`third_party/` `MDK-ARM/` `build/` 为上游/工具约定目录，保留其原大小写 |
 | 变量 / 函数 | 只用小写蛇形（尽量） | `g_cdc`、`bsp_led_write` |
 | 宏定义 `#define` | 大写（尽量） | `LINE_MAX`、`UART_TX_BUF_SIZE` |
 | 枚举值 | 大写（尽量） | `LINK_MOUNTED`、`TUSB_SPEED_FULL` |
@@ -274,7 +275,7 @@ bool bsp_led_read(void);
 ## §9 检查清单（收尾自检）
 
 - [ ] **第三方 / Drivers / CMSIS 文件未被改动**；第三方问题只上报、未自行修改
-- [ ] 文件名全小写；变量/函数小写；宏/枚举值/结构体类型名大写
+- [ ] 文件名全小写；**目录名全小写（仅 `Drivers` 保留 STM 原大小写）**；变量/函数小写；宏/枚举值/结构体类型名大写
 - [ ] 缩进为 4 空格、无真实 tab；函数与局部块**开/闭括号均独占一行且同列**（含 `} else {` 拆三行、单行体函数 `fn(void){ s; }` 已展开为三行）
 - [ ] 同文件同性质的 `static` 变量已合并为一个结构体，且结构体只装「同一件事」
 - [ ] 结构体实例显式 `= {0}` 初始化；`volatile` 限定落在成员上
