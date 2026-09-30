@@ -2,11 +2,11 @@
 
 > 一位嵌入式固件工程师与 AI Agent 协作沉淀下来的 **Skill 库** —— 把「踩过的坑」写成 Agent 能直接调用的判据与配方。
 >
-> 当前 **19 个 Skill / 78 篇 references / 19 篇 SKILL.md（约 1124 行）/ 9369 行参考资料**，全部 `agent_created: true`，与本地 `~/.workbuddy/skills/` **逐字节一致**。
+> 当前 **20 个 Skill / 79 篇 references / 20 篇 SKILL.md（约 1557 行）/ 10107 行参考资料**，全部 `agent_created: true`，与本地 `~/.workbuddy/skills/` **逐字节一致**。
 
 <p align="left">
-  <img alt="skills" src="https://img.shields.io/badge/Skills-19-2b6cb0">
-  <img alt="references" src="https://img.shields.io/badge/references-78-2f855a">
+  <img alt="skills" src="https://img.shields.io/badge/Skills-20-2b6cb0">
+  <img alt="references" src="https://img.shields.io/badge/references-79-2f855a">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-718096">
   <img alt="platform" src="https://img.shields.io/badge/platform-STM32%20%7C%20ESP32%20%7C%20Zephyr-c05621">
 </p>
@@ -51,13 +51,13 @@ EmbedSkills/
 
 | 层级 | 内容 | 何时加载 | 成本 |
 |---|---|---|---|
-| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 19 × ≤150 字符 ≈ 3 KB |
+| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 20 × ≤150 字符 ≈ 3 KB |
 | **L2 · 按需** | `SKILL.md` 正文（目标 2~4 KB） | 触发词命中时 | 单篇 ≈ 1/5 上下文 |
 | **L3 · 精确** | `references/*.md` | 正文指向时才读那一篇 | 按需，通常 0 |
 
 因此 `SKILL.md` 正文**只留知识点 / 判据 / 反模式 / 决策规则**，配方、完整配置、
-报错对照表一律下沉到 `references/`。Skill 数量从 39 个合并为 **19 个**后，
-常驻 description 总量从约 **26 KB 压到约 3 KB**。
+报错对照表一律下沉到 `references/`。在 2026-09 的整理中，Skill 数量从 39 个合并为 18 个，
+常驻 description 总量从约 **26 KB 压到约 3 KB**；当前共 **20 个**，常驻成本仍约 3 KB。
 
 ---
 
@@ -107,7 +107,7 @@ EmbedSkills/
 
 ## Skill 清单
 
-### MCU / 嵌入式（9）
+### MCU / 嵌入式（10）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
@@ -118,7 +118,8 @@ EmbedSkills/
 | [`mcu-debug-forensics`](mcu-debug-forensics/SKILL.md) | 串口/板子不可用时的取证：SWD 读内存、HardFault 现场解码、中断链路诊断、自研 CMSIS-DAP 探针调优 | 「读内存验证变量」「探针下载慢」 |
 | [`embedded-verification-acceptance`](embedded-verification-acceptance/SKILL.md) | **端到端验收方法论**：双构零警告、真机烧录/串口验证、`verify_*.py` PASS/FAIL 计数、一键脚本契约、故障定位决策树 | 「验收固件」「脚本跑不起来怎么定位」 |
 | [`mcu-logging`](mcu-logging/SKILL.md) | 把裸 `printf` 换成编译期可控日志系统：单宏零成本关闭、栈缓冲避开重入、RTOS 懒互斥量 / 裸机 TX 中断环形缓冲 | 「串口打印卡死」「printf 重入」 |
-| [`mcu-comment-style`](mcu-comment-style/SKILL.md) | C 源码注释规范：声明处注释/使用处默认不注、旧注释直接改删不追加、>30B 背景落档、同文件串行编辑 | 「注释太长影响阅读」「注释规范定什么」 |
+| [`mcu-code-style`](mcu-code-style/SKILL.md) | **自研 C 代码规范**：文件级静态变量合并为结构体（同一件事才合并）、按暴露数量选接口粒度、只读返回 `const` 指针、注释摘要化、第三方代码不动只上报 | 「静态变量怎么组织」「变量怎么对外暴露」「注释太长」 |
+| [`mcu-cpp-development`](mcu-cpp-development/SKILL.md) | 用 C++ 写单片机的代码方法与格式：C/C++ 混合链接与 `extern "C"`、模板 + `constexpr` 零成本外设封装、`new/delete` 重载、Makefile 双编译 | 「C++ 开发单片机」「混合编译」「undefined reference 函数重载」 |
 | [`embedded-config-portal`](embedded-config-portal/SKILL.md) | 运行期配置门户：SoftAP + 内嵌网页、唯一真值源、读写串行化、WebSocket 快照推送、无硬件前端断言 | 「网页显示的状态不对」 |
 
 ### 显示 / GUI（1）
@@ -256,11 +257,16 @@ description ≤ 150 字符，含触发词，第三人称
       - 完整备份 `~/.workbuddy/skills.bak-2026-09-21/`
 - [x] **2026-09-21** 建立本仓 ↔ 系统 skill 目录的同步机制
 - [x] **2026-09-29** 与系统目录再同步并精简：**18 → 19 个 Skill / 68 → 78 篇 references**
-      - 补齐系统侧新增：`mcu-comment-style`（整 skill）、`mail-weekly-digest`（恢复误删的 3 文件）
+      - 补齐系统侧新增：`mcu-comment-style`（整 skill，2026-09-30 改名为 `mcu-code-style`）、`mail-weekly-digest`（恢复误删的 3 文件）
       - 补齐 11 篇新 references：ESP32 的 GT911/RGB 面板/SPI-SD/WiFi-STA、SOC 的采集取证/多轴耦合/录制器/前端验收、控制侧累积量、控制台批处理陷阱
       - 合并系统丰富版 11 项（`verify-script-patterns.md` 208 → 499 行、`soc-video-and-edge-ai/SKILL.md` 51 → 109 行等）
       - 去重：3 组跨 skill 重复命令（ffplay 低延迟参数组、`python -m west build`、`idf.py` 包装器）收敛到唯一出处 + 指针
       - 修复 4 处 SKILL.md 索引缺失（`hls-latency-tuning.md`、`h7-flash-bootloader.md`、`lan8720a-rmii.md`、`uart-physical-bridge.md`）
+- [x] **2026-09-30** 同步系统侧 4 项新增 + 增设 C 代码规范规则 → **20 个 Skill / 79 篇 references**
+      - 同步新 skill `mcu-cpp-development`（C++ 写单片机：混合链接、模板零成本封装、`new/delete` 重载）
+      - 同步 `stm32-build-and-scaffold`：新增 armlink 分散加载三条硬语法与 TinyUSB 弱钩子（`keil-port.md` 240 → 399 行）
+      - `mcu-comment-style` **改名并扩写为 `mcu-code-style`**：新增「文件级静态变量合并为结构体」「按暴露数量选接口粒度」「第三方代码不动只上报」三节
+      - 全仓交叉引用同步改名（`mcu-cpp-development`、README、能力表）
 
 ### 进行中 / 计划
 

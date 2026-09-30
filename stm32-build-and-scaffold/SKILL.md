@@ -34,6 +34,15 @@ agent_created: true
 
 **两个易漏的"另一份数据"**：① 第三方库**头文件**里的 newlib 专有宏（`_ansi.h` / `_BEGIN_STD_C`）**不是可排除项** —— 就地展开成 `extern "C"` 守卫，改完**必须回归 GCC 双构**（共用头最容易在另一条工具链上静默变味）；② 两条工具链各存一份 `Stack_Size`/`Heap_Size`（`.ld` 与 `arm/startup_*.s`），移植后逐项对齐，栈偏小只在"栈上格式化"类代码里偶发暴露。
 
+**无 `--gc-sections` 的第二重后果：应用必须补上第三方库"声明由应用实现"的弱钩子**。TinyUSB 在 `CFG_TUSB_OS=OPT_OS_NONE` 下要求应用提供 `tusb_time_millis_api()`（被 `tusb.c` 的 `tusb_time_delay_ms_api` 引用）。GCC 因 `--gc-sections` 把引用方整段摘掉，符号从不出现在未定义列表里；Keil 直接报 `L6218E: Undefined symbol`。修法：在 `bsp/` 里真定义（裸机直接 `return HAL_GetTick();`）。同类模式见 `syscalls.c` 的排除（方向相反）。
+
+**armlink 分散加载的三条硬语法**（写 `.sct` 前先记）：
+1. **不支持嵌套 load region**。`RUN_REGION LOAD_REGION { ... }` 会报 `L6630E` / `L6226E` / `L6292E`。要「加载在 Flash、运行在 RAM」必须拆成**两个平级顶层 load region**，各带显式基址。
+2. `+RG` 属性组合必须**逗号分隔**：`*( +RW, +ZI )`；写成 `+RW +ZI` 直接 parse 失败。
+3. 段选择器**必须带点**：`*.o (.section_name)`；裸写 `*(SECTION)` 报 `L6231E: Missing module selector`。
+
+**ARMCLANG 链接时的「区域符号」名取自执行域名**：执行域命名 `Image$$<ER>$$Base` / `$$Limit` / `Load$$<ER>$$Base` 里 `<ER>` 是**执行域的标签**，不是 load region 名。改名后必须回头核对 C 侧 `extern` 声明。`UNINIT` 只能挂执行域，挂 load region 报 `L6324W`。
+
 ## 判据与反模式
 
 | 判据 | 反模式 |
@@ -43,6 +52,8 @@ agent_created: true
 | uvprojx 内 `syscalls.c` 计数 0，半主机抑制垫片在位且 `BKPT` 计数 0 | 把 GCC 垫片塞进 Keil；或删掉半主机抑制垫片（**延迟暴露**的 `BKPT` 停机，编译链接却全过） |
 | 帧缓冲落在 DMA 可达域（H7 DCMI 仅可达 AXI SRAM） | 帧缓冲落 DTCM，DMA 静默失败 |
 | 擦写引擎放 AXI SRAM，校验失败在擦写前 abort | 擦写引擎放 DTCM；失败仍继续擦写 |
+| 分段镜像用 `fromelf --bincombined` 出单文件 | 多 load region 下用 `--bin`，只得到一堆分片 |
+| 镜像里的 `BKPT` 逐一比对来源（DHCSR 守卫 vs 半主机） | 见到 `BKPT` 就断言半主机泄漏（TinyUSB 的 `TU_BREAKPOINT()` 会大量出现且无害） |
 
 ## 详细资料
 

@@ -1,11 +1,11 @@
-# Skills 索引（全局 `~/.workbuddy/skills/`，共 18 个）
+# Skills 索引（全局 `~/.workbuddy/skills/`，共 20 个）
 
 > **每个 skill 的 name + description 由宿主每会话自动注入**，本表只是速查索引，不重复描述。
 > 细节一律放各 skill 的 `references/`，**按需读取，不占常驻上下文**。
 > 容量约定：`SKILL.md` 正文 ≤ 6 KB（目标 2~4 KB），description ≤ 150 字符，
 > 正文只留**知识点 / 判据 / 反模式 / 决策规则**。
 
-## MCU / 嵌入式（8）
+## MCU / 嵌入式（10）
 
 | Skill | 一句话 |
 |---|---|
@@ -13,6 +13,8 @@
 | `embedded-windows-toolchain` | Windows 上的嵌入式工具链与构建环境踩坑：构建系统、shell/编码陷阱、MSVC 手工环境 |
 | `stm32-build-and-scaffold` | 工程骨架与构建系统：分层目录、CMake+Ninja、启动文件、Keil 移植、烧录与调试配置 |
 | `stm32-peripherals-and-memory` | 外设驱动速查与内存架构：显示/摄像头/存储/文件系统，以及缓存与 MPU 的正确用法 |
+| `mcu-code-style` | 自研 C 代码规范：文件级静态变量合并为结构体、按数量选对外接口粒度、注释摘要化、第三方代码不动 |
+| `mcu-cpp-development` | C++ 写单片机的代码方法与格式：C/C++ 混合链接、模板+constexpr 零成本外设封装、new/delete 重载 |
 | `mcu-debug-forensics` | 串口或板子不可用时的取证：SWD 读内存、HardFault 解码、中断链路诊断、自研探针调优 |
 | `embedded-verification-acceptance` | 端到端验收方法论：双构零警告、脚本化验收、一键脚本契约、故障定位决策树 |
 | `mcu-logging` | 把裸 printf 换成编译期可控的日志系统：栈缓冲、TX 中断环形缓冲、RTOS 与裸机双路径 |
@@ -65,5 +67,7 @@
 - **本次整理（2026-09-21）**：由 39 个合并为 18 个；description 总长从约 26 KB 降到约 3 KB。
   退役副本：`~/.workbuddy/skills.retired-2026-09-21/`（36 个，**零删除，可原样搬回**）。
   完整备份：`~/.workbuddy/skills.bak-2026-09-21/`。
+- **2026-09-30**：`mcu-comment-style` **改名并扩写为 `mcu-code-style`**（纳入"文件级静态状态封装"
+  与"第三方边界"两条规则）。旧名已不存在，引用请统一用新名。
 - **跨仓镜像**：MCU 域 skill 会镜像到工程仓，同步脚本在工程侧 `support_tools/sync_skills.sh`。
   **镜像白名单写死在脚本里 —— 增删 skill 后必须同步改脚本**，否则新 skill 不会被镜像。

@@ -98,6 +98,100 @@ LR_IROM1 0x08000000 0x00200000
 - 但**半主机抑制不能省**：`syscalls.c` 是「别加进去」，抑制垫片是「必须留在里面」，
   两者方向相反。
 
+### 三·A、段「加载地址 ≠ 运行地址」：armlink 没有嵌套 load region
+
+典型需求（双 Bank Flash 的擦写引擎、从 RAM 执行的 bootloader 跳转引擎）：
+代码段**烧在 Flash**，运行时**拷到 AXI SRAM 执行**。GCC 侧靠 `>SRAM1 AT> FLASH` 一行搞定，
+armlink **必须拆成两个平级顶层 load region**：
+
+```
+LR_IROM1 0x08000000 0x0001E000
+{
+  ER_IROM1 0x08000000 0x0001E000
+  {
+    *.o (RESET, +First)
+    *(InRoot$$Sections)
+    .ANY (+RO)
+  }
+
+  RW_IRAM1 0x24001000 UNINIT
+  {
+    *( +RW, +ZI )                 /* 逗号！+RW +ZI 是语法错 */
+  }
+
+  RW_STACK 0x20000000 UNINIT { *.o (STACK) }
+  RW_HEAP  0x20000400 UNINIT { *.o (HEAP) }
+}
+
+/* 独立顶层 load region —— 不能写成 UPGRADE_RAM LR_IROM1 { ... } */
+LR_UPGRADE 0x0801E000 0x00002000
+{
+  UPGRADE_RAM 0x24000000 0x00002000
+  {
+    *.o (.upgrade_ram)
+    *.o (.upgrade_ram*)
+  }
+}
+```
+
+**踩坑记录（10 个 error 的连锁）**：
+
+| 写法 | 报错 |
+|---|---|
+| `UPGRADE_RAM_LOAD LR_IROM1 { ... }`（嵌套） | `L6630E: Invalid token start` + `L6226E: Missing base address for region UPGRADE_RAM_LOAD` + `L6292E: Ignoring unknown attribute 'LR_IROM1'` |
+| `*( +RW +ZI )` | `L6630E` / `L6628E: Expected '{', found ',...'` |
+| `*(UPGRADE_RAM)`（无点） | `L6231E: Missing module selector` |
+| `UNINIT` 挂 load region | `L6324W: Ignoring UNINIT attribute specified for Load region` |
+
+**定位手法**：直接跑 `armlink.exe --scatter=<file> --info=sizes`（不经 IDE），
+再在临时目录里做最小变体二分——比反复 UV4 全量构建快得多。
+
+**区域符号名来自「执行域」标签**：执行域叫 `UPGRADE_RAM` → `Image$$UPGRADE_RAM$$Base` /
+`$$Limit` / `Load$$UPGRADE_RAM$$Base`。若执行域写成 `ER_UPGRADE` 就得引用
+`Image$$ER_UPGRADE$$Base` —— 改名后**必须回头核对 C 侧 `extern` 声明**，否则 `L6218E`。
+
+**C 侧跨工具链写法**（不进任何链接选项，纯 scatter + 预处理）：
+
+```c
+#if defined(__ARMCC_VERSION)
+extern uint8_t Image$$UPGRADE_RAM$$Base[];
+extern uint8_t Image$$UPGRADE_RAM$$Limit[];
+extern uint8_t Load$$UPGRADE_RAM$$Base[];
+#define RUN_START  ((uint32_t)(uintptr_t)Image$$UPGRADE_RAM$$Base)
+#define RUN_END    ((uint32_t)(uintptr_t)Image$$UPGRADE_RAM$$Limit)
+#define LOAD_START ((uint32_t)(uintptr_t)Load$$UPGRADE_RAM$$Base)
+#else
+extern uint8_t _supgrade_ram, _eupgrade_ram, _supgrade_ram_load;
+#define RUN_START  ((uint32_t)(uintptr_t)&_supgrade_ram)
+#define RUN_END    ((uint32_t)(uintptr_t)&_eupgrade_ram)
+#define LOAD_START ((uint32_t)(uintptr_t)&_supgrade_ram_load)
+#endif
+
+memcpy((void *)RUN_START, (const void *)LOAD_START, RUN_END - RUN_START);
+__DSB(); __ISB();   /* 拷贝后立刻生效，再调用进去 */
+```
+
+> 先试过 `--predefine=-D_supgrade_ram=Image$$UPGRADE_RAM$$Base`（含 `$$`→`\$` 各种转义），
+> **全部无效**，符号仍 undefined。改走上面的纯 C 分支后**不需要任何链接选项**。
+
+**多 load region ⇒ After-Build 必须用 `--bincombined`**：
+
+```bat
+fromelf --bin           --output Objects\app.bin !L   :: 产出「目录」！每个 region 一个文件
+fromelf --bincombined   --output Objects\app.bin !L   :: 单文件可烧录镜像 ✔
+```
+
+判据：`ls Objects/app.bin` 若是个目录（内含 `ER_IROM1` / `UPGRADE_RAM` 等分片），
+就是用了 `--bin`。
+
+**验收（ELF 级，无需真机）**：
+
+```bash
+arm-none-eabi-readelf -S Objects/app.axf | grep -A1 UPGRADE_RAM   # Address 应为 RAM 地址
+fromelf --text -s Objects/app.axf | grep -E "Image\\\$\\\$UPGRADE_RAM|Load\\\$\\\$UPGRADE_RAM"
+# Load$$UPGRADE_RAM$$Base 应落在 Flash loader 区，Image$$UPGRADE_RAM$$Base 应是 RAM 地址
+```
+
 ## 四、重写 uvprojx（关键字段）
 
 - `<TargetName>` / `<Device>STM32<型号>xx</Device>` / `<PackID>Keil.STM32<系列>xx_DFP.<版本></PackID>`
@@ -146,6 +240,11 @@ LR_IROM1 0x08000000 0x00200000
 | **烧录后串口无输出 / 程序停在 `BKPT`（调试器里看不出，编译链接却全过）** | **误删了半主机抑制垫片，半主机未抑制**；一旦有裸 `printf` 即链入半主机 | 恢复垫片（`__use_no_semihosting` + `_sys_exit`/`_ttywrch`），并用 `fromelf --text -c` 确认 `BKPT` 计数为 0 |
 | `UV4` 卡住不返回 | 误加 `-h` 或弹 GUI | 只用 `-b` 批模式，日志走 `-o` |
 | 设备解析失败 | DFP 版本/路径不对 | 装对 DFP 版本，确认 `PackID` |
+| `L6218E: Undefined symbol tusb_time_millis_api (referred from tusb.o)` | `CFG_TUSB_OS=OPT_OS_NONE` 下 TinyUSB 要求应用实现（见六·D） | 在 `bsp/` 里定义 `uint32_t tusb_time_millis_api(void){ return HAL_GetTick(); }` |
+| `L6218E: Undefined symbol Image$$XXX$$Base` | 区域符号名取自**执行域**标签，与 C 侧 `extern` 名不一致 | 用 `fromelf --text -s` 查真实符号名，或把执行域改名对齐 |
+| `L6630E` / `L6226E` / `L6292E`（嵌套 load region） | armlink 不支持 `ER LR_IROM1 { }` 写法 | 改平级顶层 load region（见三·A） |
+| `L6231E: Missing module selector` | 段选择器少了点 | `*(SEC)` → `*.o (.sec)` |
+| `fromelf --bin` 产出一个目录 | 存在多个非连续 load region | 改用 `--bincombined` |
 | 编译链接时间过长、Flash 占用虚高、无用符号告警 | 整包导入了 HAL 全部 `.c` | 按需引入 HAL 源，见下节 A |
 
 ### 六·A、HAL 库按需引入（Keil 侧写法）
@@ -220,13 +319,73 @@ grep -nE "Stack_Size|Heap_Size" sys_startup/arm/*.s sys_startup/*.ld
 判据：Keil 的 `ZI-data` 增量应恰好等于两处差值之和（本项目 +1536 = +1024 + 512），
 且 `.bin` 头部第 1 个字（初始 SP）随之抬升。
 
+### 六·D、无 `--gc-sections` 的第二重后果：库的「应用弱钩子」必须真实现
+
+Keil 不只把「入了组的 `.c`」全量链进去，还**不做 GCP 摘除**。所以第三方库中那些
+「声明由应用提供」的弱钩子，在 GCC 下可能从未暴露，在 Keil 下直接 `L6218E`。
+
+实测案例（TinyUSB，`CFG_TUSB_OS=OPT_OS_NONE`）：
+
+```c
+/* third_party/tinyusb/src/tusb.c —— 被 tusb_time_delay_ms_api() 引用 */
+uint32_t tusb_time_millis_api(void);   /* "implemented by the application" */
+```
+
+- **GCC 侧**：`tusb_time_delay_ms_api` 是独立 section `.text.tusb_time_delay_ms_api`，
+      `--gc-sections` 把它整段摘掉 → 该符号**在 GCC 的 ELF 和 map 里都不存在**，
+      所以从没报错。
+- **Keil 侧**：报 `Undefined symbol tusb_time_millis_api (referred from tusb.o)`。
+
+修法：在 `bsp/`（板级）里真实现，不放 third_party：
+
+```c
+/* bsp/usb_board.c */
+uint32_t tusb_time_millis_api(void) { return HAL_GetTick(); }
+```
+
+⇒ **通用判据**：Keil 首次链接第三方库时，凡 `referred from <lib>.o` 的 undefined 符号，
+先怀疑「该库文档里写着由 application/port 提供」的钩子，而不是自己的代码写错了。
+同族还有 `CFG_TUSB_OS` 相关的 `osal_*`、以及 RTOS 的 `vApplicationIdleHook` 等。
+
+### 六·E、镜像里的 `BKPT`：先分辨来源，别一律当半主机
+
+TinyUSB 的 `TU_BREAKPOINT()`（`src/common/tusb_verify.h`）会生成一段
+**读 `CoreDebug->DHCSR` 的守卫**，只有挂着调试器时才真的执行 `BKPT #0`：
+
+```
+f64e50f0    mov.w  r0, #0xedf0
+f2ce0000    movt   r0, #0xe000
+6800        ldr    r0, [r0]      ; CoreDebug->DHCSR
+07c0        lsls   r0, r0, #31
+d000        beq    +0
+be00        bkpt   #0
+```
+
+一个用到 TinyUSB 的镜像里这类 `BKPT` 有几十个（本项目 61 个）是**正常的**。
+
+**判据（两条都要查）**：
+
+```bash
+fromelf --text -c Objects/app.axf | grep -cE "[[:space:]]BKPT[[:space:]]"   # 数量可能非 0
+fromelf --text -c Objects/app.axf | grep -c "SVC.*0xab"                    # 半主机：必须 0
+```
+
+半主机调用是 `SVC 0xAB`，TinyUSB 守卫是 `BKPT #0` —— **看汇编码上下文**，
+不要只数 `BKPT`。若确认是 DHCSR 守卫形态，记录为「已知无害」即可，不必除。
+
 ## 七、验收标准
 
 - [ ] `build_log.htm` 末行 `0 Error(s), 0 Warning(s)`
 - [ ] `Objects/` 下 `.axf` / `.hex` / `.bin` 均生成
 - [ ] uvprojx 中不含 `syscalls.c`（`grep -c syscalls MDK-ARM/*.uvprojx` == 0）
 - [ ] 半主机抑制垫片在 uvprojx 中且文件实际存在；
-      `fromelf --text -c Objects/*.axf | grep -c " BKPT"` == 0
+      `fromelf --text -s Objects/*.axf | grep -E "__use_no_semihosting|_sys_exit"` 有命中，
+      `fromelf --text -c Objects/*.axf | grep -c "SVC.*0xab"` == 0
+      （注意：`BKPT` 计数**可能非 0**，须按六·E 分辨是否为 DHCSR 守卫）
+- [ ] 应用已实现第三方库要求的弱钩子（如 `tusb_time_millis_api`），无 `L6218E` 残留
+- [ ] 段「加载地址 ≠ 运行地址」用两个平级 load region 表达（非嵌套）；
+      `fromelf --text -s` 证实 `Load$$<ER>$$Base` 在 Flash、`Image$$<ER>$$Base` 在 RAM
+- [ ] After-Build 用 `fromelf --bincombined`（多 load region 下 `--bin` 会产出目录）
 - [ ] HAL 源按需引入：HAL 组内 `.c` 为个位数~十几个（非目录全量），与 CMake 侧 HAL 源列表一一对应；
       新增外设时两侧同步补齐
 - [ ] `fromelf --info=totals` 的 ROM 大小与预期一致（与 CMake 侧同源集产物量级相当）
