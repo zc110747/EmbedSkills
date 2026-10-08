@@ -31,6 +31,11 @@ agent_created: true
 | 编码 | FatFs `FF_CODE_PAGE=936` 承载 GBK，改小会让中文路径乱码；渲染前先判"无 BOM 合法 UTF-8"再决定是否转码 |
 | 卷名 | 挂载名由 FatFs 配置（卷名字宏 / `FF_VOLUMES` 顺序）决定，不可跨平台照搬 |
 | 颜色字节序 | emWin(`GUI_USE_ARGB=0`) 为 0x00BBGGRR，LVGL 为 0x00RRGGBB，跨库比对像素前先做 R/B 交换 |
+| H7 分频器字段 | `RCC->D2CFGR` 的 `D2PPRE1/2` 是**分频编码**不是分频值：`0`=不分频、`4`=/2、`5`=/4、`6`=/8、`7`=/16。只有 `0` 时 APB timer clock = PCLKx，否则 = PCLK×2 |
+| H7 DMA 启动 | `HAL_DMA_Start_IT(hdma, Src, Dst, Len)` 是 **4 参数**，不吃 `Init.PeriphAddr/MemAddr`（F4 字段）；`MEMORY_TO_PERIPH` 时 `Src→M0AR`、`Dst→PAR` |
+| H7 TIM 宏 | `__HAL_TIM_ENABLE/DISABLE/SET_COUNTER/CLEAR_FLAG` 都要 `TIM_HandleTypeDef*`（宏内取 `->Instance`），**不能传 `TIM2`**；要留常驻 handle |
+| 寄存器偏移 | 别凭印象读寄存器：`RCC_APB1LENR` 偏移 0xE8（不是 0x40）、`TIM_PSC` 0x28 / `TIM_ARR` 0x2C。读错偏移会得出"时钟没使能"之类的假结论 |
+| H7 bit-band | **不支持** F1/F4 式 peripheral bit-band，别写 `SRAM_BASE + bit*4` 映射；改用 `GPIOx->BSRR`（位号选置/复位，单次 32 位存储天然原子），**不要对 ODR 做 read-modify-write**（会与 DMA 抢同一寄存器） |
 
 ## 判据与反模式
 
@@ -41,6 +46,13 @@ agent_created: true
 - 反模式：为 DMA 正确性关全局 D-Cache；把 DTCM 当 DMA 缓冲或 RAM 执行区；
   硬编码屏幕画布尺寸而不按 GUI 库接口取分辨率；给"7 数据位 + 校验"链路按字节直接搬运；
   跨 GUI 库直接复用颜色字面量。
+- **算外设时钟必须回读 RCC 域寄存器**（`grep "define RCC_D2CFGR_D2PPRE1_DIV"` 确认编码），
+  禁止套 F1/F4 经验或假设 timer clock = CPU clock：APB 分频 ≠1 时 timer clock 是 PCLK×2，
+  算错会让定时周期差一倍、协议侧表现为"完全收不到"。
+- **把硬件放置约束写成构建期硬校验，而不是注释**：DMA 缓冲不许落 DTCM、必须按 cache line
+  对齐，做成 POST_BUILD `cmake -P` 脚本（`objdump -h` 取 VMA/size，不合规直接 `FATAL_ERROR`）。
+  配套的探针数组必须加 `volatile` —— 否则 `-Os` 当死存储删掉、段 size 变 0，
+  Release 构建会**静默跳过**校验。
 
 ## 详细资料
 
