@@ -112,6 +112,9 @@ ls Drivers/STM32<系列>xx_HAL_Driver/Src
 - `rtos` 字段按实际内核填写（Zephyr 工程填 `"Zephyr"`，裸机/FreeRTOS 用 `"auto"`）。
 - `preLaunchTask: "build"` 让 F5 先编译再调试。
 - 严禁写死 `<openocd 安装目录>/bin/openocd.exe`、`${env:...}/...` 等本机或环境变量路径。
+- 同工程若**另有 Keil 构建**（`executable` 指向 `Objects/<target>/*.axf`），那条配置**不能走 `load`**
+  —— armlink 把 RAM 侧段的 LMA 写成 RAM 地址，gdb 会往 RAM 写、复位后跑进 `HardFault`。
+  正解是 OpenOCD 烧 `.hex`、gdb 只取符号，见 `keil-port.md` §七·A。
 
 多工程批量统一：`tasks.json` 只保留 `configure` / `build` / `clean` / `flash` 四个任务，
 构建机制按工程现状保留（不强行统一为 CMake）；批量检索工程时排除 `.gitignore` 中的目录。

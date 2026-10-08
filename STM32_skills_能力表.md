@@ -69,5 +69,8 @@
   完整备份：`~/.workbuddy/skills.bak-2026-09-21/`。
 - **2026-09-30**：`mcu-comment-style` **改名并扩写为 `mcu-code-style`**（纳入"文件级静态状态封装"
   与"第三方边界"两条规则）。旧名已不存在，引用请统一用新名。
-- **跨仓镜像**：MCU 域 skill 会镜像到工程仓，同步脚本在工程侧 `support_tools/sync_skills.sh`。
-  **镜像白名单写死在脚本里 —— 增删 skill 后必须同步改脚本**，否则新 skill 不会被镜像。
+- **跨仓镜像**：全局 `~/.workbuddy/skills/` 是**唯一权威副本**，各工程**直接使用全局 skills**
+  （**已无工程级镜像**，旧 `support_tools/sync_skills.sh` 已废弃）。改完 skill 后在本仓跑
+  `bash sync_skills.sh` 刷新镜像，末尾须 `RESULT: OK`，然后本地 commit。
+  脚本**目录自动发现**（无写死白名单，不会因增删 skill 而过期），兼作漂移检查；
+  支持 `--check` / `--prune` / `--restore` / `--list`。
