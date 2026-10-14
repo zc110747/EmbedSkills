@@ -8,11 +8,14 @@ lint_bat.py — STM32 一键编译脚本 (build_oneclick.bat) 规范校验器
 cmd 解析错误，避免双击/PowerShell 一跑就崩。
 
 用法:
+    python lint_bat.py                      # 默认递归扫描【当前目录】下的 build_oneclick.bat
     python lint_bat.py <path/to/build_oneclick.bat> [more .bat ...]
-    python lint_bat.py --scan <dir>          # 递归扫描目录下所有 build_oneclick.bat
-    python lint_bat.py --self                # 扫描常见工程根（调试用）
+    python lint_bat.py --scan <dir>          # 递归扫描指定目录下所有 build_oneclick.bat
+    python lint_bat.py --here                # 显式扫描当前目录（--self 为兼容别名）
 
-退出码: 0 = 无 ERROR 级违规; 1 = 存在 ERROR 级违规。
+退出码: 0 = 无 ERROR 级违规（含"没扫到文件"）; 1 = 存在 ERROR 级违规; 2 = 用法错误。
+
+注：默认扫描目录就是 `os.getcwd()`，脚本内【不写死】任何本机路径或工程仓名。
 
 ==== 实测结论（2026-08-28, Win11 cmd）====
 * 真正会崩的是【echo/@echo 文本里的特殊字符】(对应原"致命坑 3")：
@@ -106,6 +109,10 @@ def lint_file(path):
     return out
 
 
+USAGE = ("usage: python lint_bat.py [<file.bat> ...] [--scan <dir>] [--here]\n"
+         "       (no arguments: scan the current directory recursively)")
+
+
 def main(argv):
     targets = []
     scan_dirs = []
@@ -114,20 +121,33 @@ def main(argv):
         a = argv[i]
         if a == "--scan":
             i += 1
+            if i >= len(argv):
+                print("error: --scan needs a directory")
+                print(USAGE)
+                return 2
             scan_dirs.append(argv[i])
-        elif a == "--self":
-            scan_dirs += ["D:/data/workspace", "D:/user_project/git/MCU-Agent"]
+        elif a in ("--here", "--self"):
+            # 显式扫描当前目录。不再写死任何本机路径 / 工程仓名。
+            scan_dirs.append(os.getcwd())
+        elif a in ("-h", "--help"):
+            print(USAGE)
+            return 0
         else:
             targets.append(a)
         i += 1
+
+    # 默认：不带参数时扫描当前目录，避免内置一份"常见工程根"清单随人/随机器过期。
+    if not targets and not scan_dirs:
+        scan_dirs.append(os.getcwd())
 
     for d in scan_dirs:
         for f in glob.glob(os.path.join(d, "**", "build_oneclick.bat"), recursive=True):
             targets.append(f)
 
     if not targets:
-        print("usage: python lint_bat.py <file.bat> [..] | --scan <dir> | --self")
-        return 2
+        scope = ", ".join(scan_dirs) if scan_dirs else "."
+        print("no build_oneclick.bat found under: %s" % scope)
+        return 0
 
     err_files = 0
     err_total = 0

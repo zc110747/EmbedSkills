@@ -309,27 +309,50 @@ B 工具链上引入静默行为变化。
 （排除不了，只能改）。同类需警惕的 newlib/POSIX 头：`<sys/stat.h>` `<sys/types.h>`
 `<unistd.h>` `<reent.h>`。
 
-### 六·C、栈/堆预算：两条工具链的默认值几乎必然不一致
+### 六·C、栈/堆预算：两条工具链各存一份，而且**语义不同**
 
 GCC 的 `.ld` 与 Keil 的 `startup_<part>.s` **各自保存一份** `Stack_Size` / `Heap_Size`，
-移植时极易只改一边。本项目实测差异：
-
-| | GCC（`.ld`） | Keil（`arm/startup_*.s`） | 处置 |
-|---|---|---|---|
-| Stack | 2 KB | **1 KB** | 对齐 → 2 KB |
-| Heap | 512 B | **0 B** | 对齐 → 512 B |
-
-⇒ 移植后**逐项核对这两个数**：
+移植时极易只改一边：
 
 ```bash
-grep -nE "Stack_Size|Heap_Size" sys_startup/arm/*.s sys_startup/*.ld
+grep -nE "Stack_Size|Heap_Size" sys_startup/arm/*.s         # Keil: Stack_Size / Heap_Size
+grep -nE "_Min_Stack_Size|_Min_Heap_Size" sys_startup/*.ld  # GCC
 ```
 
-不一致就以 GCC 侧为准改 Keil 侧。栈偏小只在"栈上格式化"类代码（`snprintf` + 栈缓冲，
-如本项目 `bsp_uart_printf`）里暴露，属**偶发、难查**的一类问题。
+但**「不一致就以 GCC 为准对齐」是错的** —— 两者根本不是同一个量：
 
-判据：Keil 的 `ZI-data` 增量应恰好等于两处差值之和（本项目 +1536 = +1024 + 512），
-且 `.bin` 头部第 1 个字（初始 SP）随之抬升。
+| | 语义 | 偏小的后果 |
+|---|---|---|
+| GCC `_Min_Stack_Size` / `_Min_Heap_Size` | **仅守卫预留**：`_estack` 钉在 RAM 顶，栈从顶向低长，`_Min_*` 只是拦住 `.bss` 不进这段地址 | **永不报错**，"4 KB"不是需求上限，只是名义值 |
+| Keil `AREA STACK` / `AREA HEAP`（`startup_<part>.s`） | **固定尺寸的实体块**，被 `RW_IRAMx { .ANY (+RW +ZI) }` 摆在 `.bss`/堆之上 | 越界即踩坏相邻静态数据 → **HardFault 或静默数据损坏** |
+
+⇒ 典型症状：**同一份源码 GCC 构建一切正常、Keil 构建进 `HardFault_Handler`**。
+实测案例（HAL DMA/TIM + 收发中断的裸机工程）：
+
+| | GCC | Keil | 结果 |
+|---|---|---|---|
+| Stack | `_Min_Stack_Size` 4 KB | `Stack_Size` **1 KB** → 抬到 **8 KB** | Keil 侧 1 KB 时确定 HardFault，8 KB 恢复 |
+| Heap | `_Min_Heap_Size` 2 KB | `Heap_Size` 512 B | 未用堆，不影响 |
+
+**切忌**因为"GCC 用 4 KB 没事"就把 Keil 也设成 4 KB：那是名义值不是实测需求值，
+要按 **Keil 的硬上限**给足余量（此类工程 8 KB 起），或按实测栈高水位反推后再留余量。
+
+取证（三条都很便宜）：
+
+```bash
+grep -nE "STACK|__initial_sp" MDK-ARM/Listings/<target>/<name>.map
+# 期望形如：
+#   Stack_Mem     <addr>  Data    <Stack_Size>  startup_<part>.o(STACK)
+#   STACK         <addr>  Section <Stack_Size>  ...
+#   __initial_sp  <Stack_Mem + Stack_Size>
+```
+
+- **HardFault 现场判是否栈溢出**：读 `LR` 的 `EXC_RETURN`（`0xFFFFFFFD` = 线程态用 PSP，
+  `0xFFFFFFF9` = 用 MSP）；裸机无 RTOS 时 main 与**所有 ISR 共用 MSP**，
+  中断嵌套时的需求可能远高于主循环峰值。
+- 两条工具链的初始 SP **天然不同**（GCC `_estack` = RAM 顶；Keil `__initial_sp` 落在 `RW_IRAM1`
+  的「已用区」之上，并非 RAM 顶），调试时看到不同 SP 值属正常，不是 bug。
+- Keil 侧改完，`ZI-data` 增量应等于两处差值之和，且 `.bin` 头部第 1 个字（初始 SP）随之抬升。
 
 ### 六·D、无 `--gc-sections` 的第二重后果：库的「应用弱钩子」必须真实现
 
@@ -385,7 +408,73 @@ fromelf --text -c Objects/app.axf | grep -c "SVC.*0xab"                    # 半
 半主机调用是 `SVC 0xAB`，TinyUSB 守卫是 `BKPT #0` —— **看汇编码上下文**，
 不要只数 `BKPT`。若确认是 DHCSR 守卫形态，记录为「已知无害」即可，不必除。
 
-## 七、验收标准
+## 七、用 Keil 的产物做 VSCode / Cortex-Debug 调试
+
+**先纠一个前提**：Cortex-M 大多**没有可用的纯软件仿真模型**——Keil Simulator 只有指令级模型、
+没有外设时序，QEMU 的 STM32 机器模型更弱。凡工程依赖 GPIO/TIM/DMA/EXTI 的**亚微秒时序**
+（软件 UART、位脉冲、DMA 链），"仿真环境"只能落地为 **ST-Link 硬件调试会话**
+（编译 → 烧录 → 断点/单步/外设寄存器视图）。开谈之前先把这句说清楚，
+否则会做出一个"看起来能跑、却测不出任何时序问题"的假环境。
+
+### 七·A、`.axf` 不能给 gdb `load`（Keil 产物 vs GCC 产物的关键区别）
+
+armlink 的 scatter-load 语义把 **RAM 侧段的 LMA 直接写成 RAM 地址**（`RW_IRAM1` `0x20000000`、
+`.dma_buf` `0x24000000`）。gdb 的 `load` 按 LMA 写，于是：
+
+```
+Loading section RW_IRAM1,   size 0x20 lma 0x20000000
+Loading section RW_DMA_BUF, size 0x18 lma 0x24000000
+```
+
+→ 写进 RAM 而不是 flash，复位后跑的仍是旧镜像 → 实测直接停在 `HardFault_Handler`（很容易被
+误判成"Keil 构建的固件有问题"）。GCC 的 `.elf` 无此问题（`>RAM AT>FLASH` 明确区分 LMA/VMA），
+所以这条**只在混用 Keil 产物时**出现。
+
+**正解：OpenOCD 烧 `.hex`（或 `.bin`）提供内容，gdb 只加载 `.axf` 取符号、不 `load`。**
+
+```json
+{
+  "executable": "${workspaceFolder}/MDK-ARM/Objects/debug/<name>.axf",
+  "overrideLaunchCommands": ["monitor reset halt", "break main", "continue"],
+  "preLaunchTask": "keil-flash-hex"
+}
+```
+
+`overrideLaunchCommands` 的用途就是顶掉默认的 `load`（顺带顶掉默认 `monitor reset halt`）；
+`preLaunchTask` 里用 `openocd -c "program Objects/debug/<name>.hex verify"` 烧录。
+
+判据：断点能命中 `main`，且 SP 落在 Keil 布局的栈区间内（与 GCC 构建的 SP 值不同是正常的，见六·C）。
+
+### 七·B、DFP 的 `DebugDeviceUnlock → CheckID` 在 ST-Link 上报 `E310`
+
+DFP（H7 为 `Keil.STM32H7xx_DFP.4.1.3`）的调试描述序列会经 **APB-AP** 读 CoreSight ROM table 的
+PIDR：先 `ReadAP(0xF8)` 取 ROM table 基址，再读 `基址 + 0x0FE4`（`0xE00E0000 + 0x0FE4`）。
+ST-Link 上这条访问失败 → `E310: Debug access failed`、`DebugDeviceUnlock -> CheckID` 报错。
+
+**它只用于器件识别，与烧录无关**（`Erase Done / Programming Done / Verify OK` 照常完成）。
+消除办法：uvoptx 里关掉整个 `DebugDescription`：
+
+```xml
+<DebugDescription>
+  <Enable>0</Enable>
+  <EnableFlashSeq>0</EnableFlashSeq>
+```
+
+⚠️ 别为这条报错去换 DFP 版本或改连接速度 —— **先确认烧录本身是否成功**。
+
+### 七·C、调试会话被强杀会暂时废掉探针；日志要看 stderr
+
+gdb 未正常 `detach` 就被 SIGTERM（前台超时 / `kill` / IDE 崩）→ 下一轮 openocd 报
+`Error: init mode failed (unable to connect to the target)`。这是**瞬时**状态，**重试即恢复**
+（必要时降 `adapter speed`，或用 `reset_config srst_only srst_nogate connect_assert_srst`）。
+⇒ 断言"探针/硬件坏了"之前先重试两次；脚本收尾用 `-ex "detach"`，不要 kill。
+
+另两条同类记牢：
+- openocd 的 `mdw` / `reg` 回显走 **stderr**，用 Python 抓 stdout 会拿到空 —— **两个流都要扫**。
+- 混用"Keil 图形界面 + UV4 命令行"时，**UV4 命令行不会回写 uvoptx**：调试器选择、驱动注册表
+  （`TargetDriverDllRegistry`）等只有 GUI 才会写。要脚本化交付，uvoptx 得手写或由 GUI 保存一次。
+
+## 八、验收标准
 
 - [ ] `build_log.htm` 末行 `0 Error(s), 0 Warning(s)`
 - [ ] `Objects/` 下 `.axf` / `.hex` / `.bin` 均生成
@@ -401,11 +490,16 @@ fromelf --text -c Objects/app.axf | grep -c "SVC.*0xab"                    # 半
 - [ ] HAL 源按需引入：HAL 组内 `.c` 为个位数~十几个（非目录全量），与 CMake 侧 HAL 源列表一一对应；
       新增外设时两侧同步补齐
 - [ ] `fromelf --info=totals` 的 ROM 大小与预期一致（与 CMake 侧同源集产物量级相当）
-- [ ] **栈/堆与 GCC 侧逐项一致**（`grep -nE "Stack_Size|Heap_Size"` 两侧对比），
-      且 `ZI-data` 增量 == 两处差值之和
+- [ ] **Keil 侧栈/堆按「硬上限」给足**（不是照抄 GCC 的 `_Min_*` 名义值）：
+      `grep -nE "Stack_Size|Heap_Size" sys_startup/arm/*.s` 与 `.ld` 两侧对比，
+      map 里 `startup_*.o(STACK)` 的尺寸与 `__initial_sp` 相符，
+      GCC 构建正常而 Keil 进 `HardFault` 时**优先怀疑这里**
 - [ ] 语言级别够用：工程用了 `_Static_assert`（C11）或 C99 `T f(int a[static N])` 时，
       uvprojx 需 `uAC6=1` 且 C 级别给到 C99/GNU 变体（本项目 `uC99=1` + `uGnu=1` + `v6Lang=5`
       实测可编过这两者）；否则会报 `expected expression` 一类莫名其妙的语法错
 - [ ] 第三方库**无 newlib 专有头依赖**（`grep -rn "_ansi\.h\|_BEGIN_STD_C" third_party/` 无命中）
 - [ ] 帧缓冲落在 AXI SRAM（ZI ≈ `N × W × H` 字节，与 `.framebuffer` 段一致）
+- [ ] 用 Keil 产物做 VSCode/Cortex-Debug 调试时：**`.hex` 由 OpenOCD 烧、gdb 只取 `.axf` 符号**
+      （`overrideLaunchCommands` 顶掉默认 `load`），断点能命中 `main`
+- [ ] UV4 烧录日志无 `E310` / `DebugDeviceUnlock` 类报错，或已关 `DebugDescription` 并确认其无害
 - [ ] 真机烧录/运行验证为可选后续（与 GCC 构建共用同一份源码逻辑）
