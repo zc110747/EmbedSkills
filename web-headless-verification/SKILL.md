@@ -23,6 +23,7 @@ agent_created: true
 | 逐帧记录器 | 在渲染回调里读**渲染真用的矩阵**，不调 `updateMatrixWorld()` | 帧 0 读到单位阵常是仪器伪影，不是 bug |
 | 造前提 | 瞬态复现不了，多半是触发前提没被摆出来 | 去**数据源**造前提，别在渲染器里戳 |
 | 源头对齐 | 修"同一份几何被喂了两组输入"，应让两个输入在源头一致 | 把第二个物体藏起来只掩盖假状态与跳变 |
+| Canvas 2D 像素跨度 | 波形/曲线"改了量程/缩放/高亮后确实更可见"要可复核，不能只截图 | `getImageData` 量目标色曲线纵向 span，判据用 `span/h` 比例；对比前先滑出环形缓冲历史 |
 
 ## 判据与反模式
 
@@ -41,4 +42,5 @@ agent_created: true
 - `references/esbuild-probe.md` —— Check A：打包客户端模块打活服务、字段存在性断言、打包与加载的坑。
 - `references/ssr-render-probe.md` —— Check B：组件 SSR 渲染、red flag 扫描、正样本与空态、hook 调用方式。
 - `references/webgl-frame-recorder.md` —— 首帧三类分流、逐帧记录器三条纪律、截图残差、数据源造前提与修法护栏。
+- `references/canvas-pixel-assert.md` —— Canvas 2D 像素跨度取证：用 `getImageData` 量曲线纵向 span 证明"显示修复真的可见"，含环形缓冲历史污染、canvas 选择器/容差两个必踩坑。
 - `references/env-traps.md` —— 浏览器可用性判定、前端启动顺序、CORS 两端预检、后台进程与 shell 坑。

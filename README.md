@@ -2,13 +2,14 @@
 
 > 一位嵌入式固件工程师与 AI Agent 协作沉淀下来的 **Skill 库** —— 把「踩过的坑」写成 Agent 能直接调用的判据与配方。
 >
-> 当前 **20 个 Skill / 79 篇 references / 20 篇 SKILL.md（约 1557 行）/ 10107 行参考资料**，全部 `agent_created: true`，与本地 `~/.workbuddy/skills/` **逐字节一致**。
+> 当前 **36 个 Skill / 98 篇 references / 36 篇 SKILL.md（约 4626 行）/ 12623 行参考资料 / 12 个脚本**，全部 `agent_created: true`，与本地 `~/.workbuddy/skills/` **逐字节一致**。
 
 <p align="left">
-  <img alt="skills" src="https://img.shields.io/badge/Skills-20-2b6cb0">
-  <img alt="references" src="https://img.shields.io/badge/references-79-2f855a">
+  <img alt="skills" src="https://img.shields.io/badge/Skills-36-2b6cb0">
+  <img alt="references" src="https://img.shields.io/badge/references-98-2f855a">
+  <img alt="scripts" src="https://img.shields.io/badge/scripts-12-805ad5">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-718096">
-  <img alt="platform" src="https://img.shields.io/badge/platform-STM32%20%7C%20ESP32%20%7C%20Zephyr-c05621">
+  <img alt="platform" src="https://img.shields.io/badge/platform-MCU%20%7C%20SOC%20%7C%20%E4%B8%8A%E4%BD%8D%E6%9C%BA-c05621">
 </p>
 
 ---
@@ -51,13 +52,13 @@ EmbedSkills/
 
 | 层级 | 内容 | 何时加载 | 成本 |
 |---|---|---|---|
-| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 20 × ≤150 字符 ≈ 3 KB |
+| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 29 × ≤150 字符 ≈ 4 KB |
 | **L2 · 按需** | `SKILL.md` 正文（目标 2~4 KB） | 触发词命中时 | 单篇 ≈ 1/5 上下文 |
 | **L3 · 精确** | `references/*.md` | 正文指向时才读那一篇 | 按需，通常 0 |
 
 因此 `SKILL.md` 正文**只留知识点 / 判据 / 反模式 / 决策规则**，配方、完整配置、
 报错对照表一律下沉到 `references/`。在 2026-09 的整理中，Skill 数量从 39 个合并为 18 个，
-常驻 description 总量从约 **26 KB 压到约 3 KB**；当前共 **20 个**，常驻成本仍约 3 KB。
+常驻 description 总量从约 **26 KB 压到约 3 KB**；当前共 **29 个**，常驻成本仍约 4 KB。
 
 ---
 
@@ -107,7 +108,7 @@ EmbedSkills/
 
 ## Skill 清单
 
-### MCU / 嵌入式（10）
+### MCU / 嵌入式（12）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
@@ -119,21 +120,26 @@ EmbedSkills/
 | [`embedded-verification-acceptance`](embedded-verification-acceptance/SKILL.md) | **端到端验收方法论**：双构零警告、真机烧录/串口验证、`verify_*.py` PASS/FAIL 计数、一键脚本契约、故障定位决策树 | 「验收固件」「脚本跑不起来怎么定位」 |
 | [`mcu-logging`](mcu-logging/SKILL.md) | 把裸 `printf` 换成编译期可控日志系统：单宏零成本关闭、栈缓冲避开重入、RTOS 懒互斥量 / 裸机 TX 中断环形缓冲 | 「串口打印卡死」「printf 重入」 |
 | [`mcu-code-style`](mcu-code-style/SKILL.md) | **自研 C 代码规范**：文件级静态变量合并为结构体（同一件事才合并）、按暴露数量选接口粒度、只读返回 `const` 指针、注释摘要化、第三方代码不动只上报 | 「静态变量怎么组织」「变量怎么对外暴露」「注释太长」 |
+| [`mcu-code-style-apply`](mcu-code-style-apply/SKILL.md) | **mcu-code-style 落地施工**：把规范批量应用到既有 STM32/嵌入式工程——clang-format 配置、GBK 编码保护、生成文件豁免、目录大小写改名、static 合并、MDK/GCC 双构建验证与提交拆分 | 「给某工程应用 code style」「按新规范更新老项目」 |
 | [`mcu-cpp-development`](mcu-cpp-development/SKILL.md) | 用 C++ 写单片机的代码方法与格式：C/C++ 混合链接与 `extern "C"`、模板 + `constexpr` 零成本外设封装、`new/delete` 重载、Makefile 双编译 | 「C++ 开发单片机」「混合编译」「undefined reference 函数重载」 |
 | [`embedded-config-portal`](embedded-config-portal/SKILL.md) | 运行期配置门户：SoftAP + 内嵌网页、唯一真值源、读写串行化、WebSocket 快照推送、无硬件前端断言 | 「网页显示的状态不对」 |
+| [`avr-flash-ram`](avr-flash-ram/SKILL.md) | AVR(avr-gcc/avr-libc) RAM 溢出：字符串字面量默认进 .data 挤爆栈，致固件空载正常、收命令即复位。avr-size/nm/objdump 定位、PSTR/PROGMEM 正解、%S 与 %s 区别 | 「AVR 收命令复位」「.data 异常大」 |
 
-### 显示 / GUI（1）
+### 显示 / GUI（2）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
 | [`lvgl-font-and-render`](lvgl-font-and-render/SKILL.md) | LVGL 渲染层**几乎不报错** —— 缺字形、值越界、区域被裁都是安静地不画。子集字库、CTF/TTF 字库引擎、初始化顺序、屏上取证 | 「字库缺字」「豆腐块」「lv_init 崩溃」 |
+| [`lvgl9-mcu-porting`](lvgl9-mcu-porting/SKILL.md) | **v8 → v9 破坏性变化**与裸机移植陷阱：`LV_TICK_CUSTOM` 被删（首屏冻结）、`lv_color_hex` 改 RGB888、静态库 vs section 表、启动画面/动作条与多屏交接、`file(GLOB)` 不追踪新文件 | 「v8 升 v9 后首屏冻结」「复位彩条」「多屏切换」 |
 
-### 平台移植（2）
+### 平台移植（4）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
 | [`zephyr-stm32-porting`](zephyr-stm32-porting/SKILL.md) | 裸机外设搬进 Zephyr 的差异点：west 工作区、设备树 overlay、时钟树、ST7789 点亮、GBK 点阵字库、Shell | 「ST7789 全黑」 |
 | [`esp32-platform-notes`](esp32-platform-notes/SKILL.md) | Arduino CLI 与 ESP-IDF 两条构建链：构建范式、板级硬件、Cortex-Debug、组件链接陷阱 | 「openocd 报 Arg list too long」 |
+| [`ra8d1-fsp-platform-notes`](ra8d1-fsp-platform-notes/SKILL.md) | Renesas RA8D1（R7FA8D1BH / Cortex-M85 + FSP）平台经验：内存映射、GLCDC/RGB 与 MIPI DSI、xSPI/OSPI 串行 Flash、PFS 引脚复用 | 「RA8D1 显屏不出图」「OSPI CS 通道」 |
+| [`ra8d1-vscode-pyocd-debug`](ra8d1-vscode-pyocd-debug/SKILL.md) | 官方 target 缺失时，在 VSCode + CMSIS-DAP 上给 RA8D1 搭源码级调试：pyOCD 无 target 的绕过路径 | 「RA8D1 无法调试」「pyocd 报 no target」 |
 
 ### SOC / 视频 / 边端 AI（1）
 
@@ -141,26 +147,44 @@ EmbedSkills/
 |---|---|---|
 | [`soc-video-and-edge-ai`](soc-video-and-edge-ai/SKILL.md) | 三条链路：设备侧 RTSP 推流 Agent、流媒体服务端（MediaMTX + WebRTC/HLS）、零依赖 YOLO/ByteTrack 旁路 | 「HLS 黑屏」「端侧 AI 不影响视频流」 |
 
-### 机器人 / 多物理场（3）
+### 上位机应用层 / C++20 协程（3）
+
+**非固件**方向：宿主侧 C++20 运行时、单线程网络服务、大规模客户端验收。前缀 `app-`。
+
+| Skill | 解决什么 | 典型触发 |
+|---|---|---|
+| [`app-cpp20-coroutine-runtime`](app-cpp20-coroutine-runtime/SKILL.md) | 单线程协作式协程运行时的**静默失败**：五条不变量、generation 计数唤醒协议（替代锁、根治双重 resume）、帧归属与进程级泄漏断言、取消是状态不是信号、header-only 的 inline/ODR 漏网、定时器堆惰性删除、通道背压 | 「C++20 协程」「co_await 卡住」「双重 resume」「协程帧泄漏」「header-only 重复符号」 |
+| [`app-select-relay-server`](app-select-relay-server/SKILL.md) | 单线程 `select()` 服务的规模上限与可移植性：Windows `FD_SETSIZE=64` 令 `FD_SET` **静默截断**（能连上、被计入在线、数据被无声丢弃）、`listen` 必须非阻塞、`backlog` 要覆盖 accept 节奏、错误文本本地化破坏纯 ASCII 契约 | 「客户端一多就丢数据」「连接被拒」「accept 挂死」 |
+| [`app-host-load-acceptance`](app-host-load-acceptance/SKILL.md) | 多客户端规模压测与验收：参数化 N 客户端 harness、断言前先等前置条件、stats 基线防读旧行、包边界与字节相等**分层断言**、聚合恒等式做无损证明、**负向对照证明脚本有牙齿** | 「压测脚本」「1000 客户端」「负载验收」「测试恒绿或 flaky」 |
+
+### 机器人 / 多物理场（5）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
 | [`truth-source-and-model-vendoring`](truth-source-and-model-vendoring/SKILL.md) | 同一份真值在多处实现、或多份官方模型之间的**静默漂移**：冻结基线、语义核心哈希、多实现互证 | 「URDF 与 MJCF 对不上」「Sim2Sim 一致性」 |
 | [`robotics-mechanism-and-sim`](robotics-mechanism-and-sim/SKILL.md) | 机构几何真值取证（照片/CAD 反解）与 MuJoCo 对等实现、容差登记、判据验证 | 「仿真没复现真机行为」 |
 | [`robotics-link-diagnostics`](robotics-link-diagnostics/SKILL.md) | 上位机 ↔ 机械臂链路：串口/字节层、TCP/WS 关节级链路「谁引起谁跟随」、`origin` 语义、命令门控 | 「两条链路口径不一致」 |
+| [`arm-photo-texturing`](arm-photo-texturing/SKILL.md) | 实拍照片给刚体/机械臂模型贴真实纹理（Level3→4 视觉增强，非几何重建）：大面法向判定、拍摄协议、四角定位、透视校正、three.js 按面材质与 envMap | 「照片贴图」「透视校正」「数字孪生视觉增强」 |
+| [`motor-telemetry-alias-proof`](motor-telemetry-alias-proof/SKILL.md) | 读数上蹿下跳到底是欠采样旋转波形、真噪声还是饱和钳位：按相位分箱看离散度塌缩，配物理律/链路闭合/混叠比三判据 | 「PWM/相电流跳动」「波形像噪声」「数据在抖是 bug 还是采样」 |
 
-### 前端取证（1）
+### 前端 / Windows GUI 取证（3）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
 | [`web-headless-verification`](web-headless-verification/SKILL.md) | 沙箱封掉 Chromium 时：esbuild 打包客户端模块打活服务、`react-dom/server` 渲染每个组件、WebGL 首帧逐帧取证 | 「页面显示 undefined 却不报错」 |
+| [`win-gui-screenshot-verify`](win-gui-screenshot-verify/SKILL.md) | Windows 桌面 GUI(SDL/LVGL/Qt) 零依赖自动化视觉验收：ctypes+BitBlt 抓客户区、DPI 感知点击、纯 Python PNG 裁剪放大、单调用编排 | 「GUI 截图」「自动化验收」「点击没反应」「DPI 缩放」 |
+| [`wpf-realtime-sim`](wpf-realtime-sim/SKILL.md) | WPF+MVVM 实时仿真/遥测看板：解耦后台步进线程、30FPS 刷新、自更新 Canvas 趋势图、暗色主题(含 ComboBox 模板)、离屏 PNG 验证 | 「WPF 实时仿真」「无图表库趋势图」「暗色 ComboBox」 |
 
-### 工具类（2）
+### 工具类（6）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
 | [`schematic-pdf-netlist`](schematic-pdf-netlist/SKILL.md) | 从 EDA 导出的原理图 PDF 反解网表与引脚映射，写成含电源树与 NC 引脚的硬件规格文档 | 「解析原理图 PDF」 |
+| [`pyocd-flm-inject-debug`](pyocd-flm-inject-debug/SKILL.md) | 芯片无内建 pyOCD target、或 pack target 在 CMSIS-DAP 上初始化失败时：用 `pyocd_user.py` 的 `will_init_target` 钩子注入 memory map + 官方 FLM 闪存算法 | 「pyocd 烧不了」「cortex-debug 连不上」 |
 | [`mail-weekly-digest`](mail-weekly-digest/SKILL.md) | 指定周期的邮箱汇总周报，统计收发/未读/附件并按来源归类，产出深色极简 HTML | 「邮箱周报」 |
+| [`deterministic-clock-testing`](deterministic-clock-testing/SKILL.md) | 把时间抽象成可注入 TimerLike+FakeTimer，让依赖延迟/节流/超时/重试的代码可确定性测试（无真实 sleep）：最小接口、FakeTimer 四要点、四类断言 | 「定时器测试」「节流测试」「flaky 测试」「假时钟」 |
+| [`git-silent-source-loss`](git-silent-source-loss/SKILL.md) | 源文件凭空消失/换机编译不过：.gitignore 误匹配源文件 + git add 静默跳过。三步定位、修复(!例外+注释)、类案清单 | 「文件不见了」「git add 不生效」「clone 缺文件」 |
+| [`win-batch-sandbox-probe`](win-batch-sandbox-probe/SKILL.md) | Windows 批处理坑与沙箱等效验证：块内 echo 裸括号提前闭合、Python subprocess 真跑 .bat、进程树回收、shell 追加重写覆盖、file-history 救援 | 「bat 报 此时不应有 or」「沙箱跑 bat」「追加没生效」 |
 
 ---
 
@@ -175,6 +199,8 @@ Skill 之间**显式互相引用**，常用组合：
 | **屏上显示不对** | `lvgl-font-and-render` → `stm32-peripherals-and-memory`（屏/总线） → `zephyr-stm32-porting`（若走 RTOS） |
 | **给设备加网页配置** | `embedded-config-portal` → `web-headless-verification`（无硬件验证前端） → `embedded-verification-acceptance` |
 | **改机构参数前** | `robotics-mechanism-and-sim`（量真值） → `truth-source-and-model-vendoring`（防漂移） → `robotics-link-diagnostics`（验链路） |
+| **做一个上位机网络服务** | `app-cpp20-coroutine-runtime`（事件循环若是协程调度器） → `app-select-relay-server`（规模上限与运维契约） → `app-host-load-acceptance`（压测验收） |
+| **服务「客户端一多就丢数据」** | `app-select-relay-server`（`FD_SET` 截断 / `backlog`） → `app-host-load-acceptance`（复现 + 负向对照） |
 
 ---
 
@@ -294,6 +320,21 @@ skill 改名/合并后清单全部失效、静默漏同步（2026-09-30 实测 1
         各工程直接使用全局 skills（一个仓覆盖多工程）。
       - 纳管清单由**写死白名单改为目录自动发现**，根治"skill 改名/合并后静默漏同步"。
       - 新增孤儿检测（`[仅镜像存在]`）、`--check`/`--list`/`--prune`/`--restore` 全通。
+- [x] **2026-10-12** 新增**上位机应用层**方向（前缀 `app-`）：3 篇新 Skill，并补齐此前只在全局
+      存在的 4 篇（`lvgl9-mcu-porting`、`ra8d1-fsp-platform-notes`、`ra8d1-vscode-pyocd-debug`、
+      `pyocd-flm-inject-debug`）→ **29 → 36 个 Skill / 87 → 98 篇 references / 10 → 12 个脚本**
+      - 来源工程：一个 C++20 协程库 + 基于它的 TCP 中继服务 + 三层 Python 验收链
+      - `app-cpp20-coroutine-runtime`：五条不变量、generation 计数替代锁、帧归属与进程级泄漏断言、
+        header-only 的 inline/ODR 漏网、定时器堆惰性删除、通道背压
+      - `app-select-relay-server`：Windows `FD_SETSIZE=64` 的 `FD_SET` **静默截断**（含"用 0 号
+        客户端复现会得出相反结论"的诊断陷阱）、`listen` 非阻塞、`backlog` 与 accept 节奏、
+        错误文本本地化破坏纯 ASCII 契约、零依赖配置子集
+      - `app-host-load-acceptance`：三条纪律（先等前置条件 / 基线 / 断言分层）、聚合恒等式做无损
+        证明、**负向对照证明脚本有牙齿**（实测坏二进制 11/18 FAIL，签名与手工复现一致）
+      - 附 2 个已验证脚本：`probe_fdset.c`（`FD_SETSIZE=64 → stored 64/128`；
+        `-DFD_SETSIZE=8192 → 128/128`）、`net_load_harness.py`（stdlib-only，自带 loopback 自检 5/5）
+      - 3 篇 description 均 ≤150 字符；与 `embedded-verification-acceptance`、
+        `win-batch-sandbox-probe` 交叉引用，不重复既有内容
 
 ### 进行中 / 计划
 
