@@ -92,7 +92,7 @@
   补登此前漏列的 `mcu-code-style-apply`。索引现 **29 个**（本表与 README 已对齐）。
 - **跨仓镜像**：本仓即全局 `~/.workbuddy/skills/` 的唯一版本化镜像，同步脚本在**本仓** `sync_skills.sh`，
   纳管清单**目录自动发现**（不再写死白名单，改名/合并后不会静默漏同步）。
-- **2026-10-05**：新增上位机桌面应用类 2 个 skill（`winforms-desktop-app`、`piper-offline-tts`，
+- **2026-10-16**：新增上位机桌面应用类 2 个 skill（`winforms-desktop-app`、`piper-offline-tts`，
   来源：EnglishAudio 本地离线英语语音工具）。本表所列由 29 → **31**。
 - ⚠️ **已知漂移（待处理，勿用 `sync_skills.sh` 直接覆盖）**：本仓镜像侧比全局
   `~/.workbuddy/skills/` **多 15 个 skill 目录**（`app-cpp20-coroutine-runtime` / `app-host-load-acceptance` /

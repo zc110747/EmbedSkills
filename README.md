@@ -338,7 +338,7 @@ skill 改名/合并后清单全部失效、静默漏同步（2026-09-30 实测 1
         `-DFD_SETSIZE=8192 → 128/128`）、`net_load_harness.py`（stdlib-only，自带 loopback 自检 5/5）
       - 3 篇 description 均 ≤150 字符；与 `embedded-verification-acceptance`、
         `win-batch-sandbox-probe` 交叉引用，不重复既有内容
-- [x] **2026-10-05** 新增**上位机桌面应用**方向：2 篇新 Skill → 本仓 **40 → 42 个 Skill / 110 → 116 篇 references**
+- [x] **2026-10-16** 新增**上位机桌面应用**方向：2 篇新 Skill → 本仓 **40 → 42 个 Skill / 110 → 116 篇 references**
       - 来源工程：一个 C# / .NET 10 WinForms 本地离线英语语音工具（Piper TTS → WAV → 内建播放器）
       - `winforms-desktop-app`：NAudio 2.x→3.x 的破坏性改名（`WaveOutEvent`→`WaveOut`、
         `DesiredLatency`→`BufferMilliseconds`、`GetPositionTimeSpan` 变 `NAudio.Utils` 扩展方法）、
