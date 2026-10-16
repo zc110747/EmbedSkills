@@ -1,6 +1,6 @@
 ---
 name: winforms-desktop-app
-description: C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备处理、外部 CLI 集成、运行期条件跳过的测试与发布。触发：WinForms 界面、NAudio 播放、自绘控件、界面被裁、WFO1000。
+description: C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备处理、外部 CLI 集成、同一个 exe 兼作命令行工具、运行期条件跳过的测试与发布。触发：WinForms 界面、NAudio 播放、自绘控件、界面被裁、WFO1000、GUI 程序当 CLI 用。
 agent_created: true
 ---
 
@@ -36,6 +36,8 @@ agent_created: true
 | 事件只订阅一次 | `PlaybackStopped` 在播放器生命周期内**只订阅一次**；用 `_stopRequested` 区分"手动 Stop"与"自然播完"，否则 `PlaybackEnded` 会误触发 |
 | 释放顺序 | 先停设备（并等回调跑完）**再** dispose 播放流，否则播放线程会碰到已释放的流 |
 | 跨线程回 UI | 播放事件跑在音频线程上 ⇒ 一律经 `Control.Invoke` 回 UI 线程再改控件 |
+| 同一个 exe 兼作 CLI | 保留 `WinExe` + `AttachConsole(父进程)`；**`AttachConsole` 必须在读 `Console.IsOutputRedirected` 之前调用** —— 未附着时该检查会把控制台句柄误判成"已重定向"，于是"跳过附着"⇒ 真实 cmd 窗口静默无输出，而管道环境测试全绿 |
+| 提示符不等待 | WinExe 从 cmd 交互提示符启动时 cmd **不等**它；**在批处理里调用 GUI 程序则 cmd 会等** ⇒ 用一个 `.cmd` 包装器解决等待与退出码透传 |
 
 ## 反模式
 
@@ -49,10 +51,15 @@ agent_created: true
   要么条件跳过并写明原因，要么明确失败。
 - **界面缺陷靠读代码发现**：自绘布局的裁切/遮挡**只有渲染出来才看得见**。
   把"渲染成 PNG + 断言关键文本/计数"做成用例（见 references）。
+- **用"我这边没抓到输出"推断"程序没输出"**：`.cmd` 一旦介入，stdout 的归属就可能变。
+  先把 `attach / redirected / streamNull` 打成探针看事实（见 `references/gui-exe-as-cli.md` §3）。
+- **给命令行包装器加自动 `pause`**：`for` 循环与管道会在第一次失败时永久挂住。
+  `pause` 只留给双击用的启动器。
 
 ## 详细资料
 
 - `references/naudio-playback.md` — NAudio 2.x→3.x 迁移对照、播放器骨架、无设备路径、事件与释放顺序。
 - `references/custom-control-painting.md` — 圆角/裁剪/DPI/`TextRenderer`/`DefaultValue`(WFO1000) 的落地写法，与"界面被裁"的排查顺序。
 - `references/external-cli-integration.md` — 安全调用外部 CLI：`ArgumentList`、双管道防死锁、超时、杀进程树、产物原子落地。
+- `references/gui-exe-as-cli.md` — 同一个 exe 兼作命令行：子系统取舍、`AttachConsole` 顺序陷阱与探针取证法、批处理包装器、退出码契约。
 - `references/xunit-conditional-tests.md` — 条件 Fact 属性模板（真模型/音频设备/交互桌面）、测试工程引用 WinForms 的注意事项、发布命令。

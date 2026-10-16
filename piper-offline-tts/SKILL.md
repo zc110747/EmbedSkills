@@ -1,6 +1,6 @@
 ---
 name: piper-offline-tts
-description: Piper 本地离线 TTS 集成：CLI 契约（正文走 stdin、输出用 -f）、长文本无实际上限的实测方法、运行时与模型的获取及哈希/许可核对、WAV 原子落地与解码校验。触发：本地 TTS、离线语音合成、piper、文本转 WAV、模型哈希核对。
+description: Piper 本地离线 TTS 集成：CLI 契约（正文走 stdin、输出用 -f）、长文本无实际上限的实测方法、喂给 TTS 前的文本准备（章节抽取/UTF-8 仅接受/非目标语言闸门）、运行时与模型的获取及哈希/许可核对、WAV 原子落地与解码校验。触发：本地 TTS、离线语音合成、piper、文本转 WAV、Markdown 转语音、模型哈希核对。
 agent_created: true
 ---
 
@@ -28,6 +28,7 @@ agent_created: true
 | 何时才需要自己切段 | 只在你要**控制内存或让进度条动起来**时才切。"模型一般都有长度限制"是**假设**，不是事实 |
 | 其他调参 | `--noise_scale` / `--length_scale`（语速）/ `--noise_w` / `--sentence_silence` |
 | 返回码语义 | 退出码 0 **不代表**产物正确（见下）；失败时把 stderr 原文留住 |
+| 真正的坑常在"喂之前" | 素材常是教程式 Markdown（正文 + 词表 + 习题 + 答案 + 链接混在一个文件里）⇒ 要**按标题抽取章节**；编码与语言要在调用引擎**之前**判 |
 
 ## 判据与反模式
 
@@ -51,6 +52,8 @@ agent_created: true
 ## 详细资料
 
 - `references/piper-cli-contract.md` — 完整参数、调用顺序、stdin/stdout/stderr 与退出码行为、常见报错对照。
+- `references/text-prep-for-tts.md` — 喂之前的三个闸门：只抽取目标章节（代码块内的 `#` 不算标题）、
+  剥语法但不丢文字（表格/链接/实体的处理）、UTF-8 四重编码判据、非目标语言在合成前中止的做法。
 - `references/model-provisioning-and-licensing.md` — 运行时与模型的下载地址、哈希核对、目录布局、许可口径与可复现下载脚本要点。
 - 子进程调用的通用配方（`ArgumentList` / 双管道防死锁 / 超时 / 杀进程树）见
   `winforms-desktop-app/references/external-cli-integration.md`。

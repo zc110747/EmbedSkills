@@ -2,13 +2,13 @@
 
 > 一位嵌入式固件工程师与 AI Agent 协作沉淀下来的 **Skill 库** —— 把「踩过的坑」写成 Agent 能直接调用的判据与配方。
 >
-> 当前 **42 个 Skill / 116 篇 references / 42 篇 SKILL.md（约 5177 行）/ 14936 行参考资料 / 12 个脚本**，全部 `agent_created: true`。
+> 当前 **42 个 Skill / 118 篇 references / 42 篇 SKILL.md（约 5187 行）/ 15139 行参考资料 / 12 个脚本**，全部 `agent_created: true`。
 >
 > ⚠️ 与本地 `~/.workbuddy/skills/` 的镜像关系当前**存在待处理的单向漂移**（本仓为超集，全局侧疑似被回退到旧快照）—— 详见 `STM32_skills_能力表.md` 的「维护约定」，**先 `--restore` 再同步**，不要直接跑 `./sync_skills.sh`。
 
 <p align="left">
   <img alt="skills" src="https://img.shields.io/badge/Skills-42-2b6cb0">
-  <img alt="references" src="https://img.shields.io/badge/references-116-2f855a">
+  <img alt="references" src="https://img.shields.io/badge/references-118-2f855a">
   <img alt="scripts" src="https://img.shields.io/badge/scripts-12-805ad5">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-718096">
   <img alt="platform" src="https://img.shields.io/badge/platform-MCU%20%7C%20SOC%20%7C%20%E4%B8%8A%E4%BD%8D%E6%9C%BA-c05621">
@@ -350,6 +350,19 @@ skill 改名/合并后清单全部失效、静默漏同步（2026-09-30 实测 1
         68 字符 → 4.46 s / 22,050 Hz mono 16-bit）、运行时 MIT 与模型（LJ Speech 公有领域）的
         来源/版本/哈希核对口径、WAV 临时文件 + `File.Move` 原子落地
       - 2 篇 description 分别为 **132 / 127** 字符，均 ≤150；新增「上位机桌面应用（.NET / C#）」分类
+- [x] **2026-10-16（补）** 同一来源工程追加了**命令行模式**，把 3 组判据回填到已有的 2 篇 Skill
+      （**42 个 Skill / 116 → 118 篇 references**）
+      - `winforms-desktop-app/references/gui-exe-as-cli.md`（新增）：
+        子系统取舍（`WinExe` vs `Exe`）、**`AttachConsole` 必须在读 `Console.IsOutputRedirected` 之前调用**
+        （顺序反了 ⇒ 真实 cmd 窗口静默无输出，而管道环境测试**全绿**，这是最阴的一种失败形态）、
+        "抓不到输出≠没输出"的**探针取证法**（attach/redirected/streamNull 打一行日志）、
+        批处理包装器解决"提示符不等待"、分级退出码、`SafeTextWriter` 让"打印失败"不升级成"业务失败"
+      - `piper-offline-tts/references/text-prep-for-tts.md`（新增）：
+        只抽取目标章节（到同级/更高级标题截止、代码块里的 `#` 不算标题）、
+        **剥语法但不丢文字**（表格按行成段、链接保留可见文字丢 URL、实体还原）、
+        **仅接受 UTF-8 的四重判据**（BOM → NUL 占比 → 严格解码 → 控制字符兜底）、
+        非目标语言**在合成前**中止并报脚本名与码位、输出路径规则必须抽成纯函数单测
+      - 第一篇 SKILL.md 的 description 补充"同一个 exe 兼作命令行"，两篇核心知识点表各加 1~2 行
 
 ### 进行中 / 计划
 

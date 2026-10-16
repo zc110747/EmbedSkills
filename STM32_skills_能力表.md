@@ -63,8 +63,8 @@
 
 | Skill | 一句话 |
 |---|---|
-| `winforms-desktop-app` | C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备处理、外部 CLI 集成、运行期条件跳过的测试与发布 |
-| `piper-offline-tts` | Piper 本地离线 TTS 集成：CLI 契约（正文走 stdin、输出用 -f）、长文本无实际上限的实测方法、运行时与模型的获取及哈希/许可核对、WAV 原子落地与解码校验 |
+| `winforms-desktop-app` | C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备处理、外部 CLI 集成、同一个 exe 兼作命令行工具（`AttachConsole` 顺序陷阱）、运行期条件跳过的测试与发布 |
+| `piper-offline-tts` | Piper 本地离线 TTS 集成：CLI 契约（正文走 stdin、输出用 -f）、长文本无实际上限的实测方法、喂给 TTS 前的文本准备（章节抽取 / 仅接受 UTF-8 / 非目标语言闸门）、运行时与模型的获取及哈希/许可核对、WAV 原子落地与解码校验 |
 
 ## 工具类（5）
 
@@ -94,6 +94,8 @@
   纳管清单**目录自动发现**（不再写死白名单，改名/合并后不会静默漏同步）。
 - **2026-10-16**：新增上位机桌面应用类 2 个 skill（`winforms-desktop-app`、`piper-offline-tts`，
   来源：EnglishAudio 本地离线英语语音工具）。本表所列由 29 → **31**。
+- **2026-10-16（补）**：该工程追加命令行模式后，给上面 2 个 skill 各加 1 篇 references
+  （`gui-exe-as-cli` / `text-prep-for-tts`），skill 数不变、references 116 → **118**。
 - ⚠️ **已知漂移（待处理，勿用 `sync_skills.sh` 直接覆盖）**：本仓镜像侧比全局
   `~/.workbuddy/skills/` **多 15 个 skill 目录**（`app-cpp20-coroutine-runtime` / `app-host-load-acceptance` /
   `app-select-relay-server` / `arm-photo-texturing` / `avr-flash-ram` / `deterministic-clock-testing` /
