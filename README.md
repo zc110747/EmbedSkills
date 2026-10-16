@@ -2,11 +2,13 @@
 
 > 一位嵌入式固件工程师与 AI Agent 协作沉淀下来的 **Skill 库** —— 把「踩过的坑」写成 Agent 能直接调用的判据与配方。
 >
-> 当前 **36 个 Skill / 98 篇 references / 36 篇 SKILL.md（约 4626 行）/ 12623 行参考资料 / 12 个脚本**，全部 `agent_created: true`，与本地 `~/.workbuddy/skills/` **逐字节一致**。
+> 当前 **42 个 Skill / 116 篇 references / 42 篇 SKILL.md（约 5177 行）/ 14936 行参考资料 / 12 个脚本**，全部 `agent_created: true`。
+>
+> ⚠️ 与本地 `~/.workbuddy/skills/` 的镜像关系当前**存在待处理的单向漂移**（本仓为超集，全局侧疑似被回退到旧快照）—— 详见 `STM32_skills_能力表.md` 的「维护约定」，**先 `--restore` 再同步**，不要直接跑 `./sync_skills.sh`。
 
 <p align="left">
-  <img alt="skills" src="https://img.shields.io/badge/Skills-36-2b6cb0">
-  <img alt="references" src="https://img.shields.io/badge/references-98-2f855a">
+  <img alt="skills" src="https://img.shields.io/badge/Skills-42-2b6cb0">
+  <img alt="references" src="https://img.shields.io/badge/references-116-2f855a">
   <img alt="scripts" src="https://img.shields.io/badge/scripts-12-805ad5">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-718096">
   <img alt="platform" src="https://img.shields.io/badge/platform-MCU%20%7C%20SOC%20%7C%20%E4%B8%8A%E4%BD%8D%E6%9C%BA-c05621">
@@ -52,13 +54,14 @@ EmbedSkills/
 
 | 层级 | 内容 | 何时加载 | 成本 |
 |---|---|---|---|
-| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 29 × ≤150 字符 ≈ 4 KB |
+| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 42 条 ≈ 6.2 K 字符 / **12.9 KB** |
 | **L2 · 按需** | `SKILL.md` 正文（目标 2~4 KB） | 触发词命中时 | 单篇 ≈ 1/5 上下文 |
 | **L3 · 精确** | `references/*.md` | 正文指向时才读那一篇 | 按需，通常 0 |
 
 因此 `SKILL.md` 正文**只留知识点 / 判据 / 反模式 / 决策规则**，配方、完整配置、
 报错对照表一律下沉到 `references/`。在 2026-09 的整理中，Skill 数量从 39 个合并为 18 个，
-常驻 description 总量从约 **26 KB 压到约 3 KB**；当前共 **29 个**，常驻成本仍约 4 KB。
+常驻 description 总量从约 **26 KB 压到约 3 KB**；当前共 **42 个**，常驻 42 条 description
+实测 6,247 字符 / **12.9 KB**（其中 9 条已超「≤150 字符」约定，见下方待办）。
 
 ---
 
@@ -335,9 +338,31 @@ skill 改名/合并后清单全部失效、静默漏同步（2026-09-30 实测 1
         `-DFD_SETSIZE=8192 → 128/128`）、`net_load_harness.py`（stdlib-only，自带 loopback 自检 5/5）
       - 3 篇 description 均 ≤150 字符；与 `embedded-verification-acceptance`、
         `win-batch-sandbox-probe` 交叉引用，不重复既有内容
+- [x] **2026-10-05** 新增**上位机桌面应用**方向：2 篇新 Skill → 本仓 **40 → 42 个 Skill / 110 → 116 篇 references**
+      - 来源工程：一个 C# / .NET 10 WinForms 本地离线英语语音工具（Piper TTS → WAV → 内建播放器）
+      - `winforms-desktop-app`：NAudio 2.x→3.x 的破坏性改名（`WaveOutEvent`→`WaveOut`、
+        `DesiredLatency`→`BufferMilliseconds`、`GetPositionTimeSpan` 变 `NAudio.Utils` 扩展方法）、
+        自绘圆角卡片的**角缝补色**与 `SetClip(GraphicsPath)`、`TextRenderer` vs `DrawString`、
+        DPI 现算缩放、**WFO1000 与 `[DefaultValue]`**、`DeviceCount == 0` 是合法环境、
+        xUnit 2.x **没有** `Assert.Skip` 只能靠条件 `FactAttribute` 子类
+      - `piper-offline-tts`：CLI 契约（正文走 **stdin**、`-f` 出 WAV、`espeak-ng-data` 随 exe 自动发现）、
+        **实测长文本无实际上限**（7,499 字符一次 stdin → 500.6 s 单文件 / RTF ≈ 0.07，
+        68 字符 → 4.46 s / 22,050 Hz mono 16-bit）、运行时 MIT 与模型（LJ Speech 公有领域）的
+        来源/版本/哈希核对口径、WAV 临时文件 + `File.Move` 原子落地
+      - 2 篇 description 分别为 **132 / 127** 字符，均 ≤150；新增「上位机桌面应用（.NET / C#）」分类
 
 ### 进行中 / 计划
 
+- [ ] **解掉镜像漂移（优先）** —— 全局 `~/.workbuddy/skills/` 比本仓**少 15 个 skill**
+      （疑似被回退到 2026-09 的旧快照），且 `web-headless-verification/SKILL.md` 与
+      `STM32_skills_能力表.md` 的全局副本更旧。正确顺序：先 `./sync_skills.sh --restore`
+      （镜像 → 全局），再 `./sync_skills.sh --check` 应得 `RESULT: IDENTICAL`。
+      ⚠️ 在此之前**不要**直接跑 `./sync_skills.sh` —— 它会用全局的旧副本覆盖镜像的新副本。
+- [ ] **收敛超长 description** —— 实测 9 篇超出「≤150 字符」约定
+      （`ra8d1-fsp-platform-notes` 441 / `pyocd-flm-inject-debug` 276 / `lvgl9-mcu-porting` 224 /
+      `replica-mock-harness` 216 / `ra8d1-vscode-pyocd-debug` 204 / `stm32-build-and-scaffold` 194 /
+      `replica-memory-engine` 179 / `replica-recon` 161 / `mcu-code-style-apply` 156），
+      42 条常驻共 12.9 KB，压缩后可省下一半常驻成本。
 - [ ] **安装脚本** —— 让「全量安装」从手抄 `for` 循环变成 `install.sh` / `install.bat`（Windows 侧纯 ASCII、pause-on-error）。
 - [ ] **CI 一致性校验** —— 提交时校验 frontmatter 完整性、description 字符数、`references/` 链接有效性。
 - [ ] **领域扩展** —— 边缘 AI 部署（ONNX / CMSIS-NN 量化链路）、嵌入式 Linux SOC（RK3568 摄像头/RTSP）方向仍偏薄。

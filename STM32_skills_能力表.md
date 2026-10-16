@@ -1,4 +1,4 @@
-# Skills 索引（全局 `~/.workbuddy/skills/`，共 29 个）
+# Skills 索引（全局 `~/.workbuddy/skills/`，本表列 31 个）
 
 > **每个 skill 的 name + description 由宿主每会话自动注入**，本表只是速查索引，不重复描述。
 > 细节一律放各 skill 的 `references/`，**按需读取，不占常驻上下文**。
@@ -59,6 +59,13 @@
 | `win-gui-screenshot-verify` | Windows 桌面 GUI(SDL/LVGL/Qt) 零依赖自动化视觉验收：ctypes+BitBlt 抓客户区、DPI 感知点击、纯 Python PNG 裁剪放大、单调用编排 |
 | `wpf-realtime-sim` | WPF+MVVM 实时仿真/遥测看板：解耦后台步进线程、30FPS 刷新、自更新 Canvas 趋势图、暗色主题、离屏 PNG 验证 |
 
+## 上位机桌面应用（.NET / C#）（2）
+
+| Skill | 一句话 |
+|---|---|
+| `winforms-desktop-app` | C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备处理、外部 CLI 集成、运行期条件跳过的测试与发布 |
+| `piper-offline-tts` | Piper 本地离线 TTS 集成：CLI 契约（正文走 stdin、输出用 -f）、长文本无实际上限的实测方法、运行时与模型的获取及哈希/许可核对、WAV 原子落地与解码校验 |
+
 ## 工具类（5）
 
 | Skill | 一句话 |
@@ -85,3 +92,15 @@
   补登此前漏列的 `mcu-code-style-apply`。索引现 **29 个**（本表与 README 已对齐）。
 - **跨仓镜像**：本仓即全局 `~/.workbuddy/skills/` 的唯一版本化镜像，同步脚本在**本仓** `sync_skills.sh`，
   纳管清单**目录自动发现**（不再写死白名单，改名/合并后不会静默漏同步）。
+- **2026-10-05**：新增上位机桌面应用类 2 个 skill（`winforms-desktop-app`、`piper-offline-tts`，
+  来源：EnglishAudio 本地离线英语语音工具）。本表所列由 29 → **31**。
+- ⚠️ **已知漂移（待处理，勿用 `sync_skills.sh` 直接覆盖）**：本仓镜像侧比全局
+  `~/.workbuddy/skills/` **多 15 个 skill 目录**（`app-cpp20-coroutine-runtime` / `app-host-load-acceptance` /
+  `app-select-relay-server` / `arm-photo-texturing` / `avr-flash-ram` / `deterministic-clock-testing` /
+  `git-silent-source-loss` / `lvgl9-mcu-porting` / `motor-telemetry-alias-proof` / `pyocd-flm-inject-debug` /
+  `ra8d1-fsp-platform-notes` / `ra8d1-vscode-pyocd-debug` / `win-batch-sandbox-probe` /
+  `win-gui-screenshot-verify` / `wpf-realtime-sim`），另外 `web-headless-verification/SKILL.md` 与
+  **本文件**的镜像版本更新（镜像侧是超集；全局侧疑似被回退到 2026-09 的旧快照）。
+  ⇒ 此时跑 `./sync_skills.sh` 会用**全局的旧副本覆盖镜像的新副本**；
+  正确做法是先 `./sync_skills.sh --restore`（把镜像的 15 个 skill 与更新版文件恢复到全局），
+  再 `./sync_skills.sh --check` 应得 `RESULT: IDENTICAL`。
