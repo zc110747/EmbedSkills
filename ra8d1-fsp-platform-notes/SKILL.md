@@ -1,6 +1,6 @@
 ---
 name: ra8d1-fsp-platform-notes
-description: Renesas RA8D1（R7FA8D1BH / Cortex-M85，FSP）平台经验：芯片与内存映射、GLCDC+RGB/ MIPI DSI 显示、硬件 RTC、SCI UART/simple-I2C、PFS 引脚复用、xSPI/OSPI 串行 Flash（r_ospi_b CS 通道陷阱、MISO 线路体检）、Cache/MPU 与 SDRAM、ICU 向量表、pyOCD/OpenOCD 烧录调试、上游 FSP 集成。含 SWD 取证判据（pyOCD 读外设返回全 0 的陷阱）、仪表先校验再下结论的方法论与高频陷阱。触发：RA8D1、R7FA8D1、Renesas RA、FSP、GLCDC、r_glcdc、r_mipi_dsi、r_rtc、SCI_B、PFS 引脚、xSPI、OSPI、r_ospi_b、W25Q、QSPI Flash 读不到 ID、CS 不拉低、COMSTT 偏移、SWD 读寄存器全 0、RA8 烧录、RA8 显示不亮、子时钟/RTC 走时不对。
+description: Renesas RA8D1（R7FA8D1BH，Cortex-M85）FSP 平台经验：内存映射、GLCDC/MIPI DSI、xSPI/OSPI、SDRAM、pyOCD 烧录、SWD 取证。触发：RA8D1、R7FA8D1、FSP、GLCDC、r_ospi_b、OSPI、QSPI 读不到 ID。
 agent_created: true
 ---
 

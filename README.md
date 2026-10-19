@@ -2,9 +2,10 @@
 
 > 一位嵌入式固件工程师与 AI Agent 协作沉淀下来的 **Skill 库** —— 把「踩过的坑」写成 Agent 能直接调用的判据与配方。
 >
-> 当前 **42 个 Skill / 118 篇 references / 42 篇 SKILL.md（约 5187 行）/ 15139 行参考资料 / 12 个脚本**，全部 `agent_created: true`。
+> 当前 **42 个 Skill / 118 篇 references / 42 篇 SKILL.md（约 5190 行）/ 15139 行参考资料 / 12 个脚本**，全部 `agent_created: true`。
 >
-> ⚠️ 与本地 `~/.workbuddy/skills/` 的镜像关系当前**存在待处理的单向漂移**（本仓为超集，全局侧疑似被回退到旧快照）—— 详见 `STM32_skills_能力表.md` 的「维护约定」，**先 `--restore` 再同步**，不要直接跑 `./sync_skills.sh`。
+> ✅ 与本机 `~/.workbuddy/skills/` **已逐字节一致**（`bash sync_skills.sh --check` → `RESULT: IDENTICAL`）。
+> 提交前建议再跑一次 `python lint_skills.py`（结构一致性，见「怎么用 · 4」）。
 
 <p align="left">
   <img alt="skills" src="https://img.shields.io/badge/Skills-42-2b6cb0">
@@ -54,14 +55,14 @@ EmbedSkills/
 
 | 层级 | 内容 | 何时加载 | 成本 |
 |---|---|---|---|
-| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 42 条 ≈ 6.2 K 字符 / **12.9 KB** |
+| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 42 条 ≈ 5.4 K 字符 / **11.4 KB** |
 | **L2 · 按需** | `SKILL.md` 正文（目标 2~4 KB） | 触发词命中时 | 单篇 ≈ 1/5 上下文 |
 | **L3 · 精确** | `references/*.md` | 正文指向时才读那一篇 | 按需，通常 0 |
 
 因此 `SKILL.md` 正文**只留知识点 / 判据 / 反模式 / 决策规则**，配方、完整配置、
 报错对照表一律下沉到 `references/`。在 2026-09 的整理中，Skill 数量从 39 个合并为 18 个，
 常驻 description 总量从约 **26 KB 压到约 3 KB**；当前共 **42 个**，常驻 42 条 description
-实测 6,247 字符 / **12.9 KB**（其中 9 条已超「≤150 字符」约定，见下方待办）。
+实测 5,427 字符 / **11.4 KB**，且**全部 ≤150 字符**（2026-10-19 收口）。
 
 ---
 
@@ -160,6 +161,22 @@ EmbedSkills/
 | [`app-select-relay-server`](app-select-relay-server/SKILL.md) | 单线程 `select()` 服务的规模上限与可移植性：Windows `FD_SETSIZE=64` 令 `FD_SET` **静默截断**（能连上、被计入在线、数据被无声丢弃）、`listen` 必须非阻塞、`backlog` 要覆盖 accept 节奏、错误文本本地化破坏纯 ASCII 契约 | 「客户端一多就丢数据」「连接被拒」「accept 挂死」 |
 | [`app-host-load-acceptance`](app-host-load-acceptance/SKILL.md) | 多客户端规模压测与验收：参数化 N 客户端 harness、断言前先等前置条件、stats 基线防读旧行、包边界与字节相等**分层断言**、聚合恒等式做无损证明、**负向对照证明脚本有牙齿** | 「压测脚本」「1000 客户端」「负载验收」「测试恒绿或 flaky」 |
 
+### 上位机桌面应用（.NET / C#）（2）
+
+| Skill | 解决什么 | 典型触发 |
+|---|---|---|
+| [`winforms-desktop-app`](winforms-desktop-app/SKILL.md) | C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 2.x→3.x 破坏性改名、`DeviceCount==0` 是合法环境、**WFO1000 与 `[DefaultValue]`**、同一个 exe 兼作 CLI（`AttachConsole` 顺序陷阱）、xUnit 2.x 没有 `Assert.Skip` | 「WinForms 自绘控件」「NAudio 播放」「GUI 当 CLI 用」 |
+| [`piper-offline-tts`](piper-offline-tts/SKILL.md) | Piper 本地离线 TTS 集成：CLI 契约（正文走 **stdin**、`-f` 出 WAV）、长文本实测能力、喂 TTS 前的文本准备（章节抽取 / 仅接受 UTF-8 / 非目标语言闸门）、模型哈希与许可核对、WAV 原子落地 | 「本地 TTS」「Markdown 转语音」「模型哈希核对」 |
+
+### 复刻（逆向 → 替身 → 复现）（4）
+
+| Skill | 解决什么 | 典型触发 |
+|---|---|---|
+| [`replica-recon`](replica-recon/SKILL.md) | 复刻第一步**逆向取证**：确认原件身份与版本、PE/容器静态解析、资源与字符串挖掘、行为观察，每条结论按**证据强度**分级 | 「复刻某工具先摸清它怎么做的」 |
+| [`replica-memory-engine`](replica-memory-engine/SKILL.md) | 从外部读写目标进程内存的引擎：符号解析、AOB 签名扫描（通配展开 / 越界钳制 / 全量校验）、多级指针链、位域读写、代码洞与跳板 hook、x64 指令长度解码 | 「AOB 一条都命中不了」「指针链走到一半变空」 |
+| [`replica-mock-harness`](replica-mock-harness/SKILL.md) | **没有目标程序时的验收**：自研替身进程验证「读地址→指针链→写值→回读」整条接线，PASS/FAIL/SKIP 三分类把「环境缺位点」与「接线坏了」分开，SKIP 清单即真机补验 TODO | 「替身进程怎么造」「验收脚本总报 FAIL」 |
+| [`replica-ui-fidelity`](replica-ui-fidelity/SKILL.md) | 从参考截图**逐像素反推**复刻界面：布局度量标定、DPI 缩放、字号实测标定、色值采样、自绘控件与真实子窗口遮挡、像素级复验 | 「照着截图把界面做出来」「DPI 缩放后全错位」 |
+
 ### 机器人 / 多物理场（5）
 
 | Skill | 解决什么 | 典型触发 |
@@ -204,6 +221,7 @@ Skill 之间**显式互相引用**，常用组合：
 | **改机构参数前** | `robotics-mechanism-and-sim`（量真值） → `truth-source-and-model-vendoring`（防漂移） → `robotics-link-diagnostics`（验链路） |
 | **做一个上位机网络服务** | `app-cpp20-coroutine-runtime`（事件循环若是协程调度器） → `app-select-relay-server`（规模上限与运维契约） → `app-host-load-acceptance`（压测验收） |
 | **服务「客户端一多就丢数据」** | `app-select-relay-server`（`FD_SET` 截断 / `backlog`） → `app-host-load-acceptance`（复现 + 负向对照） |
+| **要复刻一个外部工具** | `replica-recon`（先摸清它怎么做的） → `replica-memory-engine`（读写引擎） → `replica-mock-harness`（没原件就造替身验收） → `replica-ui-fidelity`（界面 1:1） |
 
 ---
 
@@ -284,11 +302,16 @@ bash sync_skills.sh --check      # 只报漂移（0=一致, 1=有漂移）
 bash sync_skills.sh --list       # 打印纳管清单
 bash sync_skills.sh --prune      # 清理镜像侧冗余文件（全局已删的残留）
 bash sync_skills.sh --restore    # EmbedSkills -> 全局（换机 / 灾后恢复）
+python lint_skills.py            # 结构一致性校验（frontmatter / ≤150 / 引用链接）
 ```
 
-纳管范围**目录自动发现**（全局 skills 下每个顶层 skill 目录 + 顶层 `.md`），仅排除
-`README.md` / `.git` / `.workbuddy` —— 刻意**不做写死白名单**：旧版把 18 个名字硬编码，
-skill 改名/合并后清单全部失效、静默漏同步（2026-09-30 实测 18 个名字里 16 个已不存在）。
+纳管范围**两侧都自动发现再取并集**（全局 skills 下每个顶层 skill 目录 + 顶层 `.md`），仅排除
+`README.md` / `.git` / `.workbuddy` / `sync_skills.sh` / `lint_skills.py` —— 刻意**不做写死白名单**：
+旧版把 18 个名字硬编码，skill 改名/合并后清单全部失效、静默漏同步（2026-09-30 实测 18 个名字里 16 个已不存在）。
+
+> ⚠️ 只扫全局一侧会让 `--restore` 补不上「全局缺、镜像有」的目录（2026-10-19 实测：全局被回退
+> 少了 15 个 skill，`--restore` 后仍报漂移）。现已改为两侧并集，`--check` 会直接告诉你跑哪条命令：
+> `[仅全局存在→需 sync]` / `[仅镜像存在→需 restore]`。
 
 > ⚠️ 沙箱/受限 shell 内**脚本批量删除**会被 `SIGTERM` 中断（stdout 也一起丢）→
 > `--prune` 请在真实终端执行，或让 Agent 逐条 `rm`。
@@ -364,28 +387,48 @@ skill 改名/合并后清单全部失效、静默漏同步（2026-09-30 实测 1
         非目标语言**在合成前**中止并报脚本名与码位、输出路径规则必须抽成纯函数单测
       - 第一篇 SKILL.md 的 description 补充"同一个 exe 兼作命令行"，两篇核心知识点表各加 1~2 行
 
+- [x] **2026-10-19** 同步 + 瘦身 + 工具化（**42 个 Skill / 118 篇 references / 12 个脚本**）
+      - **解掉镜像漂移**：全局 `~/.workbuddy/skills/` 被回退到旧快照（比镜像少 15 个 skill 目录），
+        `--restore` + 增量补齐后 `--check` 得 `RESULT: IDENTICAL`（42 skill + 1 文件）。
+        修复前整份备份到 `~/.workbuddy/skills.bak-20261019/`。
+      - **修掉 `sync_skills.sh` 的设计缺口**：纳管清单原先只扫全局 ⇒ `--restore` 永远补不上
+        「全局缺、镜像有」的目录（本次只能手动 `cp` 15 个目录才收敛）。现改为**两侧都扫再取并集**，
+        一次即可收敛；`--check` 输出改为自解释的 `[仅全局存在→需 sync]` / `[仅镜像存在→需 restore]`，
+        并删掉与之重复的「仅镜像存在」扫描段（少一段代码、少一种口径）。
+      - **11 篇 description 全部压到 ≤150 字符**（441/276/224/216/204/194/179/178/162/161/156 → 全部合规），
+        42 条常驻 **6,328 → 5,427 字符（11.4 KB，省 14%）**；压缩时优先砍中文触发词、保留英文实体
+        （`pyocd` / `cortex-debug` / `r_ospi_b` / `AOB` 等权重更高）。
+      - 补齐 3 篇缺失的 `agent_created: true`（`lvgl9-mcu-porting`、`mcu-code-style-apply`、
+        `ra8d1-vscode-pyocd-debug`）——frontmatter 不全时宿主可能不加载该 skill。
+      - 新增仓根 **`lint_skills.py`**（零依赖、可直接进 CI）：校验 frontmatter 闭合、`name` == 目录名、
+        `description ≤150`、`agent_created: true`、正文首行 H1、`references/` 链接有效性
+        （支持 `其他skill/references/x.md` 跨引用，避免误报）。首次运行即抓出上述 5 个真实缺陷。
+      - 能力表补登漏列的 11 个 skill（31 → **42**），README 清单补 6 个（36 → **42**）：
+        新增「上位机桌面应用（.NET/C#）」与「复刻（逆向→替身→复现）」两个分组。
+
 ### 进行中 / 计划
 
-- [ ] **解掉镜像漂移（优先）** —— 全局 `~/.workbuddy/skills/` 比本仓**少 15 个 skill**
-      （疑似被回退到 2026-09 的旧快照），且 `web-headless-verification/SKILL.md` 与
-      `STM32_skills_能力表.md` 的全局副本更旧。正确顺序：先 `./sync_skills.sh --restore`
-      （镜像 → 全局），再 `./sync_skills.sh --check` 应得 `RESULT: IDENTICAL`。
-      ⚠️ 在此之前**不要**直接跑 `./sync_skills.sh` —— 它会用全局的旧副本覆盖镜像的新副本。
-- [ ] **收敛超长 description** —— 实测 9 篇超出「≤150 字符」约定
-      （`ra8d1-fsp-platform-notes` 441 / `pyocd-flm-inject-debug` 276 / `lvgl9-mcu-porting` 224 /
-      `replica-mock-harness` 216 / `ra8d1-vscode-pyocd-debug` 204 / `stm32-build-and-scaffold` 194 /
-      `replica-memory-engine` 179 / `replica-recon` 161 / `mcu-code-style-apply` 156），
-      42 条常驻共 12.9 KB，压缩后可省下一半常驻成本。
+- [x] ~~**解掉镜像漂移**~~ —— 2026-10-19 已完成，现为 `RESULT: IDENTICAL`。
+- [x] ~~**收敛超长 description**~~ —— 2026-10-19 已完成，42 条全部 ≤150 字符（共 5,427 字符）。
 - [ ] **安装脚本** —— 让「全量安装」从手抄 `for` 循环变成 `install.sh` / `install.bat`（Windows 侧纯 ASCII、pause-on-error）。
-- [ ] **CI 一致性校验** —— 提交时校验 frontmatter 完整性、description 字符数、`references/` 链接有效性。
+- [ ] **CI 一致性校验** —— `lint_skills.py` 已覆盖规则；还差把它挂到 pre-commit / GitHub Actions（`.github/` 目前为空）。
+- [ ] **正文超 6 KB 的 12 篇待分流** —— 最大 `ra8d1-fsp-platform-notes`(12.2 KB) /
+      `win-batch-sandbox-probe`(11.6 KB) / `mcu-cpp-development`(10.4 KB) / `mcu-code-style`(10.0 KB)。
+      内容密度高、无明显水分，属于「L2 按需加载」而非常驻成本，暂不动；若要瘦身，做法是
+      **下沉到同 skill 的 `references/`（不删除内容）**，而不是砍判据。
 - [ ] **领域扩展** —— 边缘 AI 部署（ONNX / CMSIS-NN 量化链路）、嵌入式 Linux SOC（RK3568 摄像头/RTSP）方向仍偏薄。
 
 ---
 
 ## 维护约定
 
+- **改动的落点别搞反**：全局 `~/.workbuddy/skills/` 是**权威副本**。要改 skill 就**先改全局**，
+  再 `bash sync_skills.sh` 刷镜像；反向操作（改镜像后跑 `sync`）会被全局旧副本**静默覆盖**，
+  而 `sync` 还会打印 `RESULT: OK`（因为两边"一致"了，只是都变成了旧版）。2026-10-19 已踩过一次。
+  仓独有文件（`README.md`、能力表）另说：README 不纳管，能力表改完要 `cp` 回全局。
 - **目录布局**：`<skill>/SKILL.md` + `references/*.md`（细节）、`scripts/`（确定性脚本）。
 - **frontmatter 五行**：`---` / `name` / `description`（≤150 字符、含触发词、第三人称）/ `agent_created: true` / `---`。
+- **提交前两条命令**：`bash sync_skills.sh --check` 要 `RESULT: IDENTICAL`，`python lint_skills.py` 要 `RESULT: OK`。
 - **零删除原则**：整理时旧版本整体退役到带日期的备份目录，可原样搬回。
 - **不写敏感信息**：本仓不含任何 token、凭据、密钥、内网地址。
 - **数字要有出处**：引脚、时钟、器件型号均经真机核对；未核对项在文中显式标注。

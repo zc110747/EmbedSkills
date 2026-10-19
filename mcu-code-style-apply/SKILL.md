@@ -1,6 +1,7 @@
 ---
 name: mcu-code-style-apply
-description: 把 mcu-code-style 规范批量应用到既有 STM32/嵌入式工程的落地流程：clang-format 配置、GBK 编码保护、生成文件豁免、目录大小写改名、static 合并、MDK/GCC 双构建验证与提交拆分。适用于"给某工程应用 code style""按新规范更新老项目""风格统一"等请求。
+description: 把 mcu-code-style 规范批量落到既有 STM32 工程：clang-format、GBK 编码保护、生成文件豁免、目录大小写改名、static 合并、MDK/GCC 双构验证与提交拆分。触发：给工程应用 code style、按新规范更新老项目。
+agent_created: true
 ---
 
 # mcu-code-style 应用流程（对既有工程施工）

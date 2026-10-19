@@ -8,10 +8,12 @@
 #   * 本仓库 EmbedSkills/ 是全局 skills 的**版本化镜像**，一个仓库覆盖所有工程，
 #     便于随 git 分发、审阅与换机恢复。
 #
-# 纳管范围 = **自动发现**：全局 skills 目录下的每个顶层子目录（= 一个 skill）+
-#   每个顶层普通文件（如能力表 STM32_skills_能力表.md），仅排除下面的 DENYLIST。
+# 纳管范围 = **自动发现**：两侧各自的顶层子目录（= 一个 skill）+ 顶层普通文件
+#   （如能力表 STM32_skills_能力表.md），仅排除下面的 DENYLIST，再取并集。
 #   ⚠️ 刻意不做硬编码白名单——历史版本的固定清单会随 skill 改名/合并而过期，导致
 #   静默漏同步（见 README「为什么自动发现」）。
+#   ⚠️ 也刻意**两侧都扫**：只扫全局时 `--restore` 补不上"全局缺、镜像有"的目录
+#   （2026-10-19 实测：全局被回退少了 15 个 skill，restore 仍报漂移，只能手动 cp）。
 #
 # 用法（Git Bash / WSL / Linux）
 #   ./sync_skills.sh             全局 -> EmbedSkills（默认，刷新镜像）
@@ -29,7 +31,7 @@ GLOBAL_DIR="${HOME}/.workbuddy/skills"
 MIRROR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 不纳管的顶层条目（仓库自身文件 / VCS / 工程元数据）
-DENYLIST=( "README.md" ".git" ".gitignore" ".workbuddy" ".github" )
+DENYLIST=( "README.md" ".git" ".gitignore" ".workbuddy" ".github" "sync_skills.sh" "lint_skills.py" )
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -46,19 +48,30 @@ is_denied() {
 
 # ---- 自动发现纳管清单 -------------------------------------------------------
 # 顶层子目录 = skill；顶层普通文件 = 附带资料（能力表等）。
+# ⚠️ 两侧都发现再取并集：只看全局会让 `--restore` 永远补不上"全局缺、镜像有"的
+# 目录（2026-10-19 实测：全局少 15 个 skill，restore 仍漂移，只能手动 cp）。
+# 去重刻意用 bash 的 case 判重，不用 `sort -u`（本机 System32\sort.exe 会遮蔽它并静默返回空）。
 MANAGED_SKILLS=()
 while IFS= read -r d; do
   n="${d##*/}"
   is_denied "${n}" && continue
+  case " ${MANAGED_SKILLS[*]-} " in *" ${n} "*) continue ;; esac
   MANAGED_SKILLS+=( "${n}" )
-done < <(find "${GLOBAL_DIR}" -mindepth 1 -maxdepth 1 -type d | sort)
+done < <(
+  { find "${GLOBAL_DIR}" -mindepth 1 -maxdepth 1 -type d
+    find "${MIRROR_DIR}" -mindepth 1 -maxdepth 1 -type d ; } | sort
+)
 
 MANAGED_FILES=()
 while IFS= read -r f; do
   n="${f##*/}"
   is_denied "${n}" && continue
+  case " ${MANAGED_FILES[*]-} " in *" ${n} "*) continue ;; esac
   MANAGED_FILES+=( "${n}" )
-done < <(find "${GLOBAL_DIR}" -mindepth 1 -maxdepth 1 -type f ! -name '.*' | sort)
+done < <(
+  { find "${GLOBAL_DIR}" -mindepth 1 -maxdepth 1 -type f ! -name '.*'
+    find "${MIRROR_DIR}" -mindepth 1 -maxdepth 1 -type f ! -name '.*' ; } | sort
+)
 
 MODE="sync"
 case "${1:-}" in
@@ -93,15 +106,15 @@ fi
 # ---- 漂移检测 ---------------------------------------------------------------
 # 返回 0 = 一致；1 = 有差异（逐项 diff，输出差异摘要）。
 check_drift() {
-  local drift=0 item src dst md mn mf
+  local drift=0 item src dst
   for item in "${MANAGED_SKILLS[@]}"; do
     src="${GLOBAL_DIR}/${item}"
     dst="${MIRROR_DIR}/${item}"
     if [ ! -d "${src}" ]; then
-      printf '  [缺失-全局] %s\n' "${item}"; drift=1; continue
+      printf '  [仅镜像存在→需 restore] %s\n' "${item}"; drift=1; continue
     fi
     if [ ! -d "${dst}" ]; then
-      printf '  [缺失-镜像] %s\n' "${item}"; drift=1; continue
+      printf '  [仅全局存在→需 sync] %s\n' "${item}"; drift=1; continue
     fi
     if ! diff -r -q "${src}" "${dst}" >/dev/null 2>&1; then
       printf '  [内容漂移] %s\n' "${item}"
@@ -113,24 +126,13 @@ check_drift() {
     src="${GLOBAL_DIR}/${item}"
     dst="${MIRROR_DIR}/${item}"
     if [ ! -f "${src}" ]; then
-      printf '  [缺失-全局] %s\n' "${item}"; drift=1; continue
+      printf '  [仅镜像存在→需 restore] %s\n' "${item}"; drift=1; continue
     fi
     if [ ! -f "${dst}" ]; then
-      printf '  [缺失-镜像] %s\n' "${item}"; drift=1; continue
+      printf '  [仅全局存在→需 sync] %s\n' "${item}"; drift=1; continue
     fi
     cmp -s "${src}" "${dst}" || { printf '  [内容漂移] %s\n' "${item}"; drift=1; }
   done
-  # 镜像侧多出来的顶层 skill 目录 / .md 文档（全局侧已整体删除）
-  while IFS= read -r md; do
-    mn="${md##*/}"; is_denied "${mn}" && continue
-    [ -d "${GLOBAL_DIR}/${mn}" ] && continue
-    printf '  [仅镜像存在] %s\n' "${mn}"; drift=1
-  done < <(find "${MIRROR_DIR}" -mindepth 1 -maxdepth 1 -type d ! -name '.*' | sort)
-  while IFS= read -r mf; do
-    mn="${mf##*/}"; is_denied "${mn}" && continue
-    [ -f "${GLOBAL_DIR}/${mn}" ] && continue
-    printf '  [仅镜像存在] %s\n' "${mn}"; drift=1
-  done < <(find "${MIRROR_DIR}" -mindepth 1 -maxdepth 1 -type f -name '*.md' | sort)
   return "${drift}"
 }
 
@@ -141,7 +143,7 @@ if [ "${MODE}" = "check" ]; then
       "${#MANAGED_SKILLS[@]}" "${#MANAGED_FILES[@]}"
     exit 0
   fi
-  printf 'RESULT: DRIFT（存在漂移，跑 ./sync_skills.sh 刷新，或 --restore 反向恢复）\n'
+  printf 'RESULT: DRIFT（[仅全局存在] 跑 ./sync_skills.sh；[仅镜像存在] 跑 ./sync_skills.sh --restore）\n'
   exit 1
 fi
 

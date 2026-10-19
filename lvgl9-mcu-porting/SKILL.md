@@ -1,6 +1,7 @@
 ---
 name: lvgl9-mcu-porting
-description: LVGL v9.x 移植到裸机 MCU（RT-Thread/裸机+framebuffer）的高频陷阱与正解：v9 tick 回调、lv_color_hex RGB888、静态库 vs section 表、开机启动画面/动作条与多屏交接、短命启动帧 SWD 取证、file(GLOB) 不追踪新文件、SWD+串口验收。触发：LVGL 移植、v8 升 v9、首屏冻结、颜色不对、framebuffer 显示驱动、启动画面/开机动画、复位彩条、多屏切换。
+description: LVGL v9 移植到裸机 MCU 的高频陷阱：v9 tick 回调、lv_color_hex 改 RGB888、静态库 vs section 表、启动画面/多屏交接、file(GLOB) 漏新文件。触发：LVGL 移植、v8 升 v9、首屏冻结、复位彩条、framebuffer 驱动。
+agent_created: true
 ---
 
 # LVGL v9.x MCU 移植陷阱

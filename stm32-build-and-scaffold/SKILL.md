@@ -1,6 +1,6 @@
 ---
 name: stm32-build-and-scaffold
-description: STM32 工程的统一骨架与构建规范：CMake+Ninja 交叉编译、HAL 按需引入、Keil MDK 移植与 UV4 命令行构建、OpenOCD 烧录、用 Keil 产物接 VSCode Cortex-Debug 调试。适用于"新建 STM32 工程""搭 CMake 构建""移植到 Keil""链接报未定义 HAL 符号""Keil 下 HardFault / 栈太小"等请求。
+description: STM32 工程骨架与构建：CMake+Ninja 交叉编译、HAL 按需引入、Keil MDK 移植与 UV4 命令行、OpenOCD 烧录、Keil 产物接 Cortex-Debug。触发：新建 STM32 工程、未定义 HAL 符号、Keil HardFault/栈太小。
 agent_created: true
 ---
 

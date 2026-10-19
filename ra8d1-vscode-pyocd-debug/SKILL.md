@@ -1,6 +1,7 @@
 ---
 name: ra8d1-vscode-pyocd-debug
-description: 在 VSCode 里对 Renesas RA8D1 (R7FA8D1BH, Cortex-M85) 做源码级仿真/调试，当 pyOCD/OpenOCD 没有 RA target、也没装 Renesas 扩展时。触发：RA8D1 + CMSIS-DAP + VSCode 调试、pyocd 报 "no matching devices"、OpenOCD 无 renesas target、仿真测试 RA8D1。
+description: VSCode 对 RA8D1（R7FA8D1BH）做源码级调试：pyOCD 无 target 时的绕过路径与 launch.json 配置。触发：RA8D1 调试、pyocd no matching devices、OpenOCD 无 renesas target、cortex-debug。
+agent_created: true
 ---
 
 # RA8D1 VSCode 仿真调试（pyOCD 通用 cortex_m + 内存映射注入）

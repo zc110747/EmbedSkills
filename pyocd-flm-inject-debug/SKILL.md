@@ -1,6 +1,6 @@
 ---
 name: pyocd-flm-inject-debug
-description: 芯片无 pyOCD 内建 target 或 pack target 在 CMSIS-DAP 上初始化失败时，用 pyocd_user.py 的 will_init_target 钩子注入 memory map + 官方 FLM 闪存算法，打通 pyOCD 烧录与 VSCode cortex-debug 在线仿真（断点/单步/变量/SVD）。触发:pyOCD 自定义 target、FLM 注入、cortex-debug pyocd servertype、软件断点插不进 flash、pack target init 失败、OpenOCD 能连不能烧。
+description: 无 pyOCD 内建 target、pack target 在 DAP 上初始化失败时，用 pyocd_user.py 钩子注入 memory map+FLM，打通烧录与仿真。触发：pyOCD target 定制、FLM 注入、cortex-debug、pack init 失败。
 agent_created: true
 ---
 

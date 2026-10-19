@@ -1,6 +1,6 @@
 ---
 name: piper-offline-tts
-description: Piper 本地离线 TTS 集成：CLI 契约（正文走 stdin、输出用 -f）、长文本无实际上限的实测方法、喂给 TTS 前的文本准备（章节抽取/UTF-8 仅接受/非目标语言闸门）、运行时与模型的获取及哈希/许可核对、WAV 原子落地与解码校验。触发：本地 TTS、离线语音合成、piper、文本转 WAV、Markdown 转语音、模型哈希核对。
+description: Piper 本地离线 TTS 集成：CLI 契约（正文走 stdin、-f 出 WAV）、长文本实测能力、喂 TTS 前的文本准备（章节抽取/仅 UTF-8/非目标语言闸门）、模型哈希与许可核对、WAV 原子落地。触发：离线语音合成、piper、文本转 WAV、Markdown 转语音。
 agent_created: true
 ---
 
