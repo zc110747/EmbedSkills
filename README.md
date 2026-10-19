@@ -2,15 +2,15 @@
 
 > 一位嵌入式固件工程师与 AI Agent 协作沉淀下来的 **Skill 库** —— 把「踩过的坑」写成 Agent 能直接调用的判据与配方。
 >
-> 当前 **42 个 Skill / 118 篇 references / 42 篇 SKILL.md（约 5190 行）/ 15139 行参考资料 / 12 个脚本**，全部 `agent_created: true`。
+> 当前 **46 个 Skill / 123 篇 references / 46 篇 SKILL.md（约 5464 行）/ 15494 行参考资料 / 11 个脚本**，全部 `agent_created: true`。
 >
 > ✅ 与本机 `~/.workbuddy/skills/` **已逐字节一致**（`bash sync_skills.sh --check` → `RESULT: IDENTICAL`）。
 > 提交前建议再跑一次 `python lint_skills.py`（结构一致性，见「怎么用 · 4」）。
 
 <p align="left">
-  <img alt="skills" src="https://img.shields.io/badge/Skills-42-2b6cb0">
-  <img alt="references" src="https://img.shields.io/badge/references-118-2f855a">
-  <img alt="scripts" src="https://img.shields.io/badge/scripts-12-805ad5">
+  <img alt="skills" src="https://img.shields.io/badge/Skills-46-2b6cb0">
+  <img alt="references" src="https://img.shields.io/badge/references-123-2f855a">
+  <img alt="scripts" src="https://img.shields.io/badge/scripts-11-805ad5">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-718096">
   <img alt="platform" src="https://img.shields.io/badge/platform-MCU%20%7C%20SOC%20%7C%20%E4%B8%8A%E4%BD%8D%E6%9C%BA-c05621">
 </p>
@@ -55,14 +55,14 @@ EmbedSkills/
 
 | 层级 | 内容 | 何时加载 | 成本 |
 |---|---|---|---|
-| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 42 条 ≈ 5.4 K 字符 / **11.4 KB** |
+| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 46 条 ≈ 5.9 K 字符 / **12.4 KB** |
 | **L2 · 按需** | `SKILL.md` 正文（目标 2~4 KB） | 触发词命中时 | 单篇 ≈ 1/5 上下文 |
 | **L3 · 精确** | `references/*.md` | 正文指向时才读那一篇 | 按需，通常 0 |
 
 因此 `SKILL.md` 正文**只留知识点 / 判据 / 反模式 / 决策规则**，配方、完整配置、
 报错对照表一律下沉到 `references/`。在 2026-09 的整理中，Skill 数量从 39 个合并为 18 个，
-常驻 description 总量从约 **26 KB 压到约 3 KB**；当前共 **42 个**，常驻 42 条 description
-实测 5,427 字符 / **11.4 KB**，且**全部 ≤150 字符**（2026-10-19 收口）。
+常驻 description 总量从约 **26 KB 压到约 3 KB**；当前共 **46 个**，常驻 46 条 description
+实测 5,899 字符 / **12.4 KB**，且**全部 ≤150 字符**（2026-10-19 收口）。
 
 ---
 
@@ -195,6 +195,15 @@ EmbedSkills/
 | [`win-gui-screenshot-verify`](win-gui-screenshot-verify/SKILL.md) | Windows 桌面 GUI(SDL/LVGL/Qt) 零依赖自动化视觉验收：ctypes+BitBlt 抓客户区、DPI 感知点击、纯 Python PNG 裁剪放大、单调用编排 | 「GUI 截图」「自动化验收」「点击没反应」「DPI 缩放」 |
 | [`wpf-realtime-sim`](wpf-realtime-sim/SKILL.md) | WPF+MVVM 实时仿真/遥测看板：解耦后台步进线程、30FPS 刷新、自更新 Canvas 趋势图、暗色主题(含 ComboBox 模板)、离屏 PNG 验证 | 「WPF 实时仿真」「无图表库趋势图」「暗色 ComboBox」 |
 
+### 静态站 / WebView 套壳（4）
+
+| Skill | 解决什么 | 典型触发 |
+|---|---|---|
+| [`web-static-site-pipeline`](web-static-site-pipeline/SKILL.md) | 只用 Python 标准库把 Markdown 内容源构建成静态站：可复现构建（逐字节比对）、校验断言按能力分叉、watch 全量重建、CSS/JS 内容指纹与 Pages `max-age=600` 缓存坑 | 「静态站加文章」「构建没产出」「校验假 FAIL」「改了样式手机不生效」 |
+| [`web-local-progress-store`](web-local-progress-store/SKILL.md) | 无后端的本地进度：localStorage 版本化、导出/导入 JSON 逐字节同构、合并 vs 覆盖与二次确认、坏存档备份、跨端镜像成同一个文件 | 「离线存进度」「导出导入」「覆盖丢记录」「两端数据对不上」 |
+| [`app-webview-shell`](app-webview-shell/SKILL.md) | 网页套壳（WinForms WebView2 / 系统 Android WebView）：三态启动、导航看门狗、离线错误菜单、进度桥接注入、离屏抓图验收 | 「网页套壳」「启动白屏」「离线要提示」「抓图空白」 |
+| [`android-apk-no-gradle`](android-apk-no-gradle/SKILL.md) | 不装 Gradle 也能量产 APK：aapt2→javac→d8→zipalign→apksigner 全链路、固定签名可覆盖升级、图标白边与真机安装坑 | 「机器没有 Gradle」「apk 装不上」「桌面图标白边」「INSTALL_FAILED_ABORTED」 |
+
 ### 工具类（6）
 
 | Skill | 解决什么 | 典型触发 |
@@ -222,6 +231,7 @@ Skill 之间**显式互相引用**，常用组合：
 | **做一个上位机网络服务** | `app-cpp20-coroutine-runtime`（事件循环若是协程调度器） → `app-select-relay-server`（规模上限与运维契约） → `app-host-load-acceptance`（压测验收） |
 | **服务「客户端一多就丢数据」** | `app-select-relay-server`（`FD_SET` 截断 / `backlog`） → `app-host-load-acceptance`（复现 + 负向对照） |
 | **要复刻一个外部工具** | `replica-recon`（先摸清它怎么做的） → `replica-memory-engine`（读写引擎） → `replica-mock-harness`（没原件就造替身验收） → `replica-ui-fidelity`（界面 1:1） |
+| **把一个静态站做成多端 App** | `web-static-site-pipeline`（站本体与缓存） → `web-local-progress-store`（本地状态与导出契约） → `app-webview-shell`（桌面/手机外壳） → `android-apk-no-gradle`（出安装包） |
 
 ---
 
@@ -405,6 +415,22 @@ python lint_skills.py            # 结构一致性校验（frontmatter / ≤150 
         （支持 `其他skill/references/x.md` 跨引用，避免误报）。首次运行即抓出上述 5 个真实缺陷。
       - 能力表补登漏列的 11 个 skill（31 → **42**），README 清单补 6 个（36 → **42**）：
         新增「上位机桌面应用（.NET/C#）」与「复刻（逆向→替身→复现）」两个分组。
+
+- [x] **2026-10-19** 新增「静态站 / WebView 套壳」方向：4 篇（**42 → 46 个 Skill / 118 → 123 篇 references**）
+      - `web-static-site-pipeline`：内容源→HTML 的构建/校验/监听约定，含**可复现判据**（重构建到临时目录
+        逐字节比对）、校验断言按**页面能力分叉**（否则空集合 → 假 FAIL）、资产内容指纹与
+        Pages `max-age=600` 的组合坑（"改了没生效"的**三步定位**：部署物 → 缓存 → 代码）。
+      - `web-local-progress-store`：把「导出 JSON」当**对外契约**（缩进 / 键序 / 行尾 / 结尾换行），
+        导入两段式（预览 → 合并或覆盖），覆盖必须二次确认；坏存档备份后重置；纯逻辑抽离到
+        `globalThis` 才能在 Node 里真跑；跨端镜像时 .NET 的 CRLF 与网页的 LF 不一致会破坏比对。
+      - `app-webview-shell`：三态启动（启动页 → 探网 → **导航成功才**显示网页）是整篇的主轴，
+        附两端差异（Windows 注入可早于导航；系统 WebView 只能在 `onPageFinished` 注入，
+        要"探存储 → 写种子 → reload 一次"并加一次性守卫），以及 Android 两个必崩点
+        （`GONE` vs `INVISIBLE`、`InsetsController` 取用时机）。
+      - `android-apk-no-gradle`：六步链路与各步真实参数（`--v4-signing-enabled false` 免出 `.idsig`、
+        `zipalign` 必须在签名前、`-I` 与 `javac -classpath` 同一份 `android.jar`），
+        外加真机安装三类坑（息屏拒绝确认、签名不一致、Git Bash 路径转换）。
+      - 新增 5 篇 references（全库参考资料 15139 → **15494 行**），全部 `agent_created: true`、description ≤150 字符。
 
 ### 进行中 / 计划
 
