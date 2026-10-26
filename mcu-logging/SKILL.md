@@ -1,6 +1,6 @@
 ---
 name: mcu-logging
-description: 把裸 printf 换成全局可控的 MCU 日志系统：单宏编译期零成本关闭、栈缓冲格式化避开重入串口发送锁、RTOS 下双 TX 路径加懒互斥量、裸机下 TX 中断驱动环形缓冲。适用于"日志能不能一键关掉""串口打印卡死""printf 重入""非阻塞日志""裸机串口日志"等请求。
+description: MCU 日志系统：单宏编译期零成本关闭、栈缓冲格式化避开重入、RTOS 懒互斥量、裸机 TX 中断环形缓冲。症状：串口打印卡死、printf 重入串口锁。
 agent_created: true
 ---
 

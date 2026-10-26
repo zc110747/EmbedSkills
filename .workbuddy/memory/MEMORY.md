@@ -24,20 +24,21 @@
 ```
 ---
 name: <与目录名完全一致>
-description: ≤150 字符、含触发词、第三人称
+description: ≤120 字符（硬上限 150）、「机制 + 症状」结构、第三人称
 agent_created: true
 ---
 ```
 
-- **description ≤150 字符是硬约束**，写前先数。压缩时优先砍中文触发词、
-  保留英文触发词（英文词触发权重更高）。
+- **description ≤120 字符**是当前约定（>120 只 WARN，>150 才 error）。**别写满**：
+  46 篇全都顶到 150 时，description 会退化成「功能清单」，反而降低模型区分度。
+- 压缩时优先砍中文功能词与「适用于…等请求」句式，保留英文实体（`pyocd` / `FLM` / `AOB` 等权重更高）。
 - 可用 `globs:` 指定适用文件类型（如 `["*.c","*.h"]`）。
 
 ## 三层加载模型
 
 | 层 | 内容 | 何时加载 |
 |---|---|---|
-| L1 常驻 | `name` + `description` | 每会话自动注入（42 × ≤150 字符 ≈ 5.4K 字符 / 11.4 KB） |
+| L1 常驻 | `name` + `description` | 每会话自动注入（41 × ≤120 字符 ≈ 3.4K 字符 / 7.1 KB） |
 | L2 按需 | `SKILL.md` 正文（目标 2~4 KB） | 触发词命中 |
 | L3 精确 | `references/*.md` | 正文指向时才读 |
 
@@ -48,26 +49,46 @@ agent_created: true
 3. **有出处** —— 引脚、寄存器、时钟、型号都核对过，未核对显式标注。
 4. **只写反直觉的部分** —— 常识不必写。
 
-## 当前规模（2026-10-19）
+## 当前规模（2026-10-26）
 
-**42 skills / 118 references / 5190 行 SKILL.md / 15139 行参考资料 / 12 个脚本**
-（10 个随 skill + 仓根 `sync_skills.sh`、`lint_skills.py`）。
+**41 skills / 130 references / 4885 行 SKILL.md / 16285 行参考资料 / 11 个脚本**
+（9 个随 skill + 仓根 `sync_skills.sh`、`lint_skills.py`）。
 
-- 42 条 description 全部 ≤150 字符，常驻 **5,427 字符 / 11.4 KB**。
+- 41 条 description 全部 **≤120 字符**，常驻 **3,400 字符 / 7.1 KB**（最长 117、平均 82）。
+  结构约定：**「机制 + 症状」双段式**，不再写「适用于…等请求」的同义堆砌。
+  `lint_skills.py`：>120 只 WARN，>150 才 error。
+- **2026-10-26 合并 5 组（46 → 41）**，旧名已不存在，任何引用一律用新名：
+  `ra8d1-vscode-pyocd-debug` → `pyocd-flm-inject-debug`（+ `references/ra8d1-instance.md`）
+  `mcu-code-style-apply` → `mcu-code-style`（+ `references/apply-to-legacy-project.md`）
+  `lvgl-font-and-render` + `lvgl9-mcu-porting` → **`lvgl-mcu`**
+  `embedded-verification-acceptance` + `app-host-load-acceptance` → **`verification-and-acceptance`**
+  `web-headless-verification` + `win-gui-screenshot-verify` → **`visual-verification`**
 - `mcu-comment-style` 已于 **2026-09-30 改名并扩写为 `mcu-code-style`**（纳入状态封装 /
   接口粒度 / 第三方边界三条规则）。旧名已不存在，任何引用一律用新名。
 - `sync_skills.sh` 纳管清单 = **两侧都扫再取并集**（原只扫全局，`--restore` 补不上
   镜像独有目录，2026-10-19 修）；`DENYLIST` 含 `README.md` / `sync_skills.sh` / `lint_skills.py`。
-- 12 篇正文 >6 KB（最大 `ra8d1-fsp-platform-notes` 12.2 KB）**暂不瘦身**：
+- 正文 >6 KB 的有 20 篇（UTF-8 字节口径，最大 `ra8d1-fsp-platform-notes` 19.3 KB）**暂不瘦身**：
   密度高无水分，且属 L2 按需加载；要动就下沉 `references/`，不砍判据。
 
-## 改名操作的影响面（下次改名照此清单）
+## 去重操作的判据（相似度用不上）
+
+正文两两 6-gram Jaccard 最高仅 **5.2%** ⇒ 文本相似度找不到重复，要按**职责边界**判：
+
+1. 正文首行**自述依赖**另一篇（`apply` 篇写「规范本体见 mcu-code-style」）⇒ 必合并。
+2. **同一机制的实例化**（RA8D1 调试 = pyocd 注入机制的芯片实例）⇒ 合并，实例参数下沉。
+3. **同一套纪律的不同战场**（固件验收 / 上位机压测 / Web 与 GUI 视觉验收）⇒ 合并，
+   只保留「通用纪律」在正文，完整原文整体下沉为 `references/*-playbook.md`。
+
+## 改名/合并操作的影响面（下次照此清单）
 
 1. `git mv <old> <new>`（保留历史），再改 frontmatter 的 `name`。
 2. 改 `README.md`：清单行、计数（Skill 数 / L1 成本行）、必要处加变更记录。
 3. 改 `STM32_skills_能力表.md`：表头计数 + 分组计数 + 条目。
-4. **grep 全仓**找其它 skill 的交叉引用（易漏，本次 `mcu-cpp-development` 有 2 处）。
+4. **grep 全仓**找其它 skill 的交叉引用（易漏，2026-10-26 有 12 个文件）。
 5. 系统目录：建新目录 + 删旧目录（内容已并入，不算"删除经验"）。
+   ⚠️ 批量 `mv` 到退役目录时**别假设成功**：2026-10-26 有 1 个目录 `mv` 报
+   `Permission denied`（其余 7 个正常），`cp` 却成功 —— 改用
+   `find <dir> -depth -delete` 单独删掉。
 
 ## 工具环境陷阱（本机实测）
 

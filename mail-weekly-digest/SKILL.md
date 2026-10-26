@@ -1,6 +1,6 @@
 ---
 name: mail-weekly-digest
-description: 生成指定周期（上周/本周/自定义区间）的邮箱汇总报告，统计收发/未读/附件并按来源归类，产出深色极简 HTML 用 present_files 打开预览，也可扩展为邮件日报/月报。适用于"邮件汇总""上周邮件""邮箱周报""邮件周报"等请求。
+description: 指定周期的邮箱汇总报告：统计收发/未读/附件并按来源归类，产出深色极简 HTML。可扩展为日报/月报。
 agent_created: true
 ---
 

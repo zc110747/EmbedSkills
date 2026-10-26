@@ -1,6 +1,6 @@
 ---
 name: truth-source-and-model-vendoring
-description: 把唯一真值源、冻结基线、语义核心哈希与多实现互证用于诊断同一份真值在多处实现、或两份官方模型之间的静默漂移。适用于"两处算法数值对不上""明明可达却越界""URDF 与 MJCF 对不上""接入官方模型""Sim2Sim 一致性""配置过期"等请求。
+description: 同一份真值在多处实现、或两份官方模型之间的静默漂移：冻结基线、语义核心哈希、多实现互证。症状：URDF 与 MJCF 对不上、Sim2Sim 不一致。
 agent_created: true
 ---
 

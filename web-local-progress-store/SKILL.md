@@ -1,6 +1,6 @@
 ---
 name: web-local-progress-store
-description: 无后端的本地进度存储：localStorage schema 版本化、导出/导入 JSON 逐字节同构、合并与覆盖、坏数据备份，以及桌面/手机外壳把它镜像成同构文件。触发：离线存进度、导出导入、覆盖丢记录、两端数据对不上。
+description: 无后端的本地进度存储：localStorage schema 版本化、导出/导入 JSON 逐字节同构、合并 vs 覆盖、坏存档备份、跨端镜像成同一文件。
 agent_created: true
 ---
 

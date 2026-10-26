@@ -1,6 +1,6 @@
 ---
 name: mcu-cpp-development
-description: 用 C++ 写单片机的代码方法与格式：C/C++ 混合链接、模板+constexpr 零成本外设封装、new/delete 重载、Makefile 双编译。适用于"C++ 开发单片机""混合编译""undefined reference 函数重载""驱动类封装"等请求。
+description: 用 C++ 写单片机：C/C++ 混合链接与 extern "C"、模板+constexpr 零成本外设封装、new/delete 重载、Makefile 双编译。症状：undefined reference 到重载函数。
 agent_created: true
 ---
 

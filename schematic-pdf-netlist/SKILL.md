@@ -1,6 +1,6 @@
 ---
 name: schematic-pdf-netlist
-description: 从 EDA（Altium/KiCad/OrCAD）导出的原理图 PDF 重建网表与引脚映射，并编写供固件开发使用的硬件参考文档（含电源树与 NC 引脚）。适用于"解析原理图 PDF""提取网表/引脚表""重建 PDF 电路连接""为固件写硬件说明文档"等请求。
+description: 从 EDA（Altium/KiCad/OrCAD）导出的原理图 PDF 重建网表与引脚映射，并写出含电源树与 NC 引脚的硬件规格文档，供固件开发使用。
 agent_created: true
 ---
 

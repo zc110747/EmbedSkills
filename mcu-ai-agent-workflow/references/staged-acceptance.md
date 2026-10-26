@@ -13,7 +13,7 @@
 - 每完成一个模块**立即增量汇报**，不要等全部做完。
 - 验收以**数字显式列出**：RAM / FLASH 占比、零警告、pass/fail 计数。
 - 具体做法与判据（零警告构建、烧录、verify 脚本形态、交付清单模板）以
-  `embedded-verification-acceptance` 为准，本节只给节奏。
+  `verification-and-acceptance` 为准，本节只给节奏。
 
 ## 各阶段判据
 

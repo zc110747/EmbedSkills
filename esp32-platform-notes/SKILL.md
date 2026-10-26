@@ -1,6 +1,6 @@
 ---
 name: esp32-platform-notes
-description: ESP32（S3/C3/C6）的 Arduino CLI / ESP-IDF 构建、RGB 面板位移与失步、GT911 触摸无响应、SPI 模式 SD 挂载失败、WiFi 站静默故障、Cortex-Debug 与链接陷阱。适用于“arduino-cli 编译 ESP32”“屏幕右移”等请求。
+description: ESP32（S3/C3/C6）：Arduino CLI 与 ESP-IDF 构建、RGB 面板位移失步、GT911 触摸无响应、SPI 模式 SD 挂载失败、Cortex-Debug 与组件链接陷阱。
 agent_created: true
 ---
 

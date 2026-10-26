@@ -1,6 +1,6 @@
 ---
 name: mcu-ai-agent-workflow
-description: 用 AI Agent 做 MCU 嵌入式开发的总方法论：环境就绪要求、提示词四要素、分阶段验收节奏、人工干预时机与认知误区。适用于"用 AI 从零生成单片机工程""给 Agent 下嵌入式任务""Vibe Coding 怎么起步""AI 写单片机"等请求。
+description: 用 AI Agent 做 MCU 开发的总方法论：环境就绪要求、提示词四要素、分阶段验收节奏、人工干预时机与认知误区。症状：AI 生成代码反复打转。
 agent_created: true
 ---
 
@@ -8,7 +8,7 @@ agent_created: true
 
 核心结论：**AI 生成嵌入式代码不难，难的是「交叉编译 + 烧录 + 仿真 + 真机验证」的自我迭代闭环**，
 以及给 Agent 一份能落地的任务上下文。本 skill 是入口，落地细节见
-`embedded-verification-acceptance`（验收）、`mcu-debug-forensics`（调试取证）、
+`verification-and-acceptance`（验收）、`mcu-debug-forensics`（调试取证）、
 `stm32-build-and-scaffold`（工程骨架）等下游 skill。
 
 ## 何时用

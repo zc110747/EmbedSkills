@@ -1,10 +1,13 @@
 ---
 name: pyocd-flm-inject-debug
-description: 无 pyOCD 内建 target、pack target 在 DAP 上初始化失败时，用 pyocd_user.py 钩子注入 memory map+FLM，打通烧录与仿真。触发：pyOCD target 定制、FLM 注入、cortex-debug、pack init 失败。
+description: pyOCD 无内建 target、或 pack target 在 CMSIS-DAP 上 init 失败时，用 pyocd_user.py 注入 memory map+FLM 打通烧录与 F5 调试。含 TrustZone 芯片实例。
 agent_created: true
 ---
 
 # pyOCD FLM 注入 + VSCode 在线仿真
+
+> 通用机制在本文件；**具体芯片的参数**（FLM 名单、地址段、构建链、headless 自测脚本）
+> 见 `references/ra8d1-instance.md`（RA8D1 / TrustZone 实例）。换芯片照该格式另写一份。
 
 ## 1. 何时用这条链路
 

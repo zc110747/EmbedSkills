@@ -1,6 +1,6 @@
 ---
 name: soc-video-and-edge-ai
-description: 摄像头视频链路与端侧 AI：RTSP 推流端可插拔后端、MediaMTX+WebRTC/HLS 服务端集成、零依赖 YOLO/ByteTrack 旁路、结果录制器与 AI 模式门控。适用于"做 RTSP 推流 Agent""HLS 黑屏""端侧 AI 不影响视频流""新模式切不过去"等请求。
+description: 摄像头视频链路与端侧 AI：RTSP 推流后端可插拔、MediaMTX+WebRTC/HLS 服务端、零依赖 YOLO/ByteTrack 旁路、AI 模式门控。症状：HLS 黑屏。
 agent_created: true
 ---
 

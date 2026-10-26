@@ -1,6 +1,6 @@
 ---
 name: web-static-site-pipeline
-description: 只用 Python 标准库把 Markdown 内容源构建成静态站：可复现构建、校验断言设计、watch 全量重建、资产内容指纹与 Pages 缓存坑。触发：静态站加文章、构建不产出、校验假 FAIL、改了样式手机不生效。
+description: 只用 Python 标准库把 Markdown 内容源构建成静态站：可复现构建（逐字节比对）、校验断言按能力分叉、资产指纹与 Pages 缓存坑。症状：改了样式手机不生效。
 agent_created: true
 ---
 

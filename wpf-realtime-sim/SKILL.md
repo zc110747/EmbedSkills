@@ -1,6 +1,6 @@
 ---
 name: wpf-realtime-sim
-description: WPF+MVVM实时仿真/遥测看板:解耦后台步进线程、30FPS刷新、自更新Canvas趋势图、暗色主题(含ComboBox模板)、离屏PNG验证。触发:WPF实时仿真、无图表库趋势图、暗色ComboBox、离屏渲染验证。
+description: WPF+MVVM 实时仿真/遥测看板：解耦后台步进线程、30FPS 刷新、自更新 Canvas 趋势图、暗色主题（含 ComboBox 模板）、离屏 PNG 验证。
 agent_created: true
 ---
 # WPF real-time simulation dashboard (no charting dependency)

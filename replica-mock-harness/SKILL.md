@@ -1,6 +1,6 @@
 ---
 name: replica-mock-harness
-description: 复刻读写类工具的替身验收：用自研替身进程在没有目标程序时验证「读地址→指针链→写值→回读」接线，PASS/FAIL/SKIP 三分类把「环境缺位点」与「接线坏了」分开。触发：没有目标程序怎么验证、替身进程、验收脚本报 FAIL、SKIP 清单。
+description: 没有目标程序时的替身验收：自研替身进程验证「读地址→指针链→写值→回读」整条接线，PASS/FAIL/SKIP 三分类分开「环境缺位」与「接线坏了」。
 agent_created: true
 ---
 

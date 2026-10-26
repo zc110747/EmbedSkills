@@ -1,6 +1,6 @@
 ---
 name: app-select-relay-server
-description: 单线程 select() 网络服务的规模上限与可移植性：Windows FD_SETSIZE=64 令 FD_SET 静默截断、listen 必须非阻塞、backlog 要覆盖 accept 节奏、错误文本会本地化破 ASCII 契约。触发：客户端一多就丢数据、连接被拒、accept 挂死。
+description: 单线程 select() 服务：Windows FD_SETSIZE=64 令 FD_SET 静默截断（客户端一多就丢数据）、listen 必须非阻塞、backlog 要覆盖 accept 节奏。
 agent_created: true
 ---
 
@@ -10,7 +10,7 @@ agent_created: true
 这类服务的规模故障有一个共同特征：**能连上、被计入在线数、然后数据被无声丢弃** ——
 没有错误、没有日志、测试用少量客户端时全绿。
 
-> 前缀 `app-` = **上位机 / 服务端应用层**（非固件）。压测与验收见 `app-host-load-acceptance`；
+> 前缀 `app-` = **上位机 / 服务端应用层**（非固件）。压测与验收见 `verification-and-acceptance`；
 > 若事件循环是自研协程调度器，先读 `app-cpp20-coroutine-runtime`。
 
 ## 何时用
@@ -68,7 +68,7 @@ agent_created: true
 #endif
 ```
 
-**命令行 `-DFD_SETSIZE=64` 是用来"复现旧行为"的**（见 `app-host-load-acceptance` 的负向对照），
+**命令行 `-DFD_SETSIZE=64` 是用来"复现旧行为"的**（见 `verification-and-acceptance` 的负向对照），
 **不是**用来验证修法的；上面那个 `#ifndef` 保护让"复现"与"修复"能共用同一份源码，正是为此。
 
 同时让"集合"说真话，别再把静默变默认：
@@ -235,7 +235,7 @@ select() → accept/recv → 推 InboundEvent  ───▶  Channel<InboundEven
   先拼成一个流再发，会在"其实能保住边界"的情况下也把边界丢掉。
 - 但 **TCP 是流**：对端 `recv()` 仍可能把两个包合并。**字节内容与顺序有保证，边界没有。**
   需要帧边界就自己加长度前缀（服务会原样透传）。
-- 由此推出两条**测量纪律**（详见 `app-host-load-acceptance`）：
+- 由此推出两条**测量纪律**（详见 `verification-and-acceptance`）：
   - 断"包边界"必须**给发送方加节奏**（发一个 → 等对端收到 → 再发下一个）；
   - 断"字节相等"可以**无条件**。
   把两类断言混在一起来写，会得到"测的是内核行为、不是服务行为"的假结论。

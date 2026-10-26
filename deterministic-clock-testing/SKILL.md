@@ -1,6 +1,6 @@
 ---
 name: deterministic-clock-testing
-description: 把时间抽象成可注入TimerLike+FakeTimer,让依赖延迟/节流/超时/重试的代码可确定性测试(无真实sleep)。含最小接口、FakeTimer四要点、四类断言。触发:定时器测试、节流测试、flaky测试、假时钟、确定性测试。
+description: 把时间抽象成可注入 TimerLike + FakeTimer，让依赖延迟/节流/超时/重试的代码可确定性测试（无真实 sleep）。含 FakeTimer 四要点与四类断言。
 agent_created: true
 ---
 # 确定性时钟测试 · 可注入 TimerLike + FakeTimer
@@ -149,7 +149,7 @@ expect(sent).toBeLessThan(80);           // 400 次命令变化，约 1600ms / 3
 - ❌ 不能用于**瞬时**断言（"此刻还没跟上"）
 
 瞬时断言必须在触发动作后**立刻**读状态，而不是等某个观测信号。
-（Web 端的具体表现与修法见 skill `web-headless-verification` 硬坑 5。）
+（Web 端的具体表现与修法见 skill `visual-verification` 硬坑 5。）
 
 ## 六、一句话流程
 

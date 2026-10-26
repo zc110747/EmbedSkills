@@ -1,6 +1,6 @@
 ---
 name: mcu-debug-forensics
-description: MCU 调试取证：SWD/OpenOCD 读内存与 HardFault 现场解码，自研 CMSIS-DAP 探针调优与主机侧验收。适用于"读内存验证变量""HardFault 定位""中断不进""探针下载慢"等请求。
+description: MCU 调试取证：SWD/OpenOCD 读内存、HardFault 现场解码、中断不进、自研 CMSIS-DAP 探针调优。用于串口或示波器不可用时怎么验证。
 agent_created: true
 ---
 

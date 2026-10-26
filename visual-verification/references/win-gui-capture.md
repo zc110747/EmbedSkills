@@ -3,7 +3,7 @@ name: win-gui-screenshot-verify
 description: Windows桌面GUI(SDL/LVGL/Qt)零依赖自动化视觉验收:ctypes+BitBlt抓客户区、DPI感知点击、纯Python PNG裁剪放大、单调用编排。触发:GUI截图、自动化验收、点击没反应、DPI缩放、BitBlt黑屏。
 agent_created: true
 ---
-# Windows GUI 的零依赖自动化视觉验收
+# Windows GUI 的零依赖自动化视觉验收（完整配方 · 由 win-gui-screenshot-verify 并入）
 
 ## 一、何时用本 skill
 
@@ -179,4 +179,4 @@ MSYS2_ARG_CONV_EXCL='*' taskkill /F /IM app.exe >/dev/null 2>&1; sleep 1
 | 没有退化 | 长跑若干秒后有意义的告警计数（应为 0）|
 
 **不要只凭"日志看起来对"就宣布通过** —— 自绘界面里"日志正常 + 界面全错"
-是常态（见 `lvgl-font-and-render` 里的字形覆盖故障）。
+是常态（见 `lvgl-mcu` 里的字形覆盖故障）。

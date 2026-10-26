@@ -1,6 +1,6 @@
 ---
 name: mcu-code-style
-description: 嵌入式 C 自研代码规范：第三方库边界、文件与命名、缩进与括号、文件级静态变量合并为结构体、按数量选对外接口粒度、固定宽度整数类型、禁堆/禁VLA内存管理、头文件 extern C、注释规范。适用于"静态变量怎么组织""变量怎么对外暴露""命名风格""括号风格""头文件怎么写""注释太长"等请求。
+description: 嵌入式 C 自研代码规范：static 变量合并成结构体、按暴露数选接口粒度、固定宽度类型、禁堆/VLA、extern "C"、注释与格式。附既有工程批量施工流程。
 globs: ["*.c", "*.h"]
 agent_created: true
 ---
@@ -340,21 +340,17 @@ bool bsp_led_read(void);
 
 ---
 
-## §10 更新与同步（强制 · 凡改本 skill 必做）
+## §10 施工与同步
 
-**本 skill（以及任何系统 skills `~/.workbuddy/skills/*/SKILL.md`）被修改后，
-"规则写入"的收尾步骤必须同步完成，否则视为未完成：**
+**施工**（对既有工程批量落地）：目录大小写改名 → clang-format（含 GBK 保护、生成文件豁免）
+→ `extern "C"` 审计 → static 合并 → MDK 组同步 → GCC/MDK 双构零警告 → 提交拆分。
+顺序与翻车点见 `references/apply-to-legacy-project.md`，照它一步步走。
 
-1. **改权威副本**：编辑 `~/.workbuddy/skills/mcu-code-style/SKILL.md`
-   （全局 `~/.workbuddy/skills/` 是**唯一权威副本**，所有编辑都在此做，不在别处改）。
-2. **同步到 EmbedSkills 仓库**（用户要求的"系统 skills 更新触发 EmbedSkills 同步"）：
-   `cp ~/.workbuddy/skills/mcu-code-style/SKILL.md /d/user_project/git/EmbedSkills/mcu-code-style/SKILL.md`
-3. **在 EmbedSkills 本地提交（不 push）**：
-   `cd /d/user_project/git/EmbedSkills && git add mcu-code-style/SKILL.md && git commit`
-   push 由用户自己处理（git push 不归我管）。
+**同步**（改完本 skill 的强制收尾）：
 
-- ⚠️ **`support_tools/sync_skills.sh` 覆盖不到本 skill**：该脚本只纳管 18 个 MCU 域 skill，
-  同步方向是 `全局 skills ⇄ 工程 .workbuddy/skills/ 镜像`，白名单里没有 `mcu-code-style`；
-  本 skill 走上面的 **EmbedSkills 直接 cp + commit** 流程，不要误用该脚本。
-- ✅ 验证：同步后 `diff -q` 两侧 SKILL.md 应一致。
-- 两个仓库（EmbedSkills / 各业务工程）均**只本地 commit、不 push**。
+1. 全局 `~/.workbuddy/skills/` 是**唯一权威副本**，所有编辑先落这里。
+2. `cd /d/user_project/git/EmbedSkills && bash sync_skills.sh` → 镜像刷新，末尾须 `RESULT: OK`。
+3. `python lint_skills.py` → `RESULT: OK`；然后本地 commit（**push 由用户自己处理**）。
+
+⚠️ 反向操作（先改镜像再跑 `sync`）会被全局旧副本**静默覆盖**，而 `sync` 仍打印
+`RESULT: OK`（两边"一致"了，只是都成了旧版）。

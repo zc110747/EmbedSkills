@@ -135,7 +135,7 @@ ls Drivers/STM32<系列>xx_HAL_Driver/Src
 - `cd /d "%~dp0"` 的尾随反斜杠问题：正确写法是先去尾部 `\` 再 `cd`。
 - `for` 循环块内**不能用 `goto`**（会中断整循环），改 `call :子例程`；块内 `2>&1` 写 `2>nul`。
 
-> `.bat` 的通用坑清单在外层 skill `embedded-verification-acceptance/references/bat-script-rules.md`，
+> `.bat` 的通用坑清单在外层 skill `verification-and-acceptance/references/bat-script-rules.md`，
 > 本文只讲 ST 工程脚本特有的部分。
 
 ## 八、startup 向量表（FreeRTOS 工程）

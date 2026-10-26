@@ -1,12 +1,12 @@
 ---
 name: stm32-build-and-scaffold
-description: STM32 工程骨架与构建：CMake+Ninja 交叉编译、HAL 按需引入、Keil MDK 移植与 UV4 命令行、OpenOCD 烧录、Keil 产物接 Cortex-Debug。触发：新建 STM32 工程、未定义 HAL 符号、Keil HardFault/栈太小。
+description: STM32 工程骨架与构建：CMake+Ninja 交叉编译、HAL 按需引入、Keil MDK 移植与 UV4 命令行、OpenOCD 烧录。症状：未定义 HAL 符号、Keil 栈太小 HardFault。
 agent_created: true
 ---
 
 # STM32 工程骨架与构建
 
-一套目录分层 + 两套构建后端（CMake/Ninja + arm-none-eabi-gcc、Keil MDK-ARM）。配套 `embedded-windows-toolchain`、`embedded-verification-acceptance`。
+一套目录分层 + 两套构建后端（CMake/Ninja + arm-none-eabi-gcc、Keil MDK-ARM）。配套 `embedded-windows-toolchain`、`verification-and-acceptance`。
 
 ## 何时用
 

@@ -4,7 +4,7 @@ description: 嵌入式项目端到端验收方法论：双构零警告、真机�
 agent_created: true
 ---
 
-# 嵌入式端到端验收
+# 嵌入式端到端验收（完整判据原文 · 由 embedded-verification-acceptance 并入）
 
 代码"生成"只是第一步，**跑通验证闭环**才是迭代基础。
 

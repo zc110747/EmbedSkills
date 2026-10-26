@@ -1,6 +1,6 @@
 # 规模压测的场景语义与陷阱
 
-配套 `app-host-load-acceptance/SKILL.md` §2。每个场景写清：**断言什么、怎么构造、会怎么骗你。**
+配套 [`host-load-playbook.md`](./host-load-playbook.md) §2。每个场景写清：**断言什么、怎么构造、会怎么骗你。**
 
 ---
 

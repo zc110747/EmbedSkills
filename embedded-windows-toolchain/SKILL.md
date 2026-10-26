@@ -1,6 +1,6 @@
 ---
 name: embedded-windows-toolchain
-description: Windows 主机上嵌入式与原生 C/C++ 工具链的环境搭建、构建执行与结果判据。适用于"嵌入式环境搭建""idf.py 构建""MSVC Ninja 构建""PowerShell 输出被吞"等请求。
+description: Windows 主机上的交叉编译与原生构建：ARM GCC、ESP-IDF、Zephyr、MSVC+CMake/Ninja 的环境搭建、执行与结果判据。含控制台输出被吞的陷阱。
 agent_created: true
 ---
 

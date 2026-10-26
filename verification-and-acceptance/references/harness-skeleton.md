@@ -1,6 +1,6 @@
 # 通用 harness 骨架：设计说明与演进顺序
 
-配套 `app-host-load-acceptance/SKILL.md` §4。代码见 [`../scripts/net_load_harness.py`](../scripts/net_load_harness.py)
+配套 [`host-load-playbook.md`](./host-load-playbook.md) §4。代码见 [`../scripts/net_load_harness.py`](../scripts/net_load_harness.py)
 （stdlib-only，可直接嵌入你的 `verify_*.py`）。
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: avr-flash-ram
-description: AVR(avr-gcc/avr-libc)RAM溢出诊断修复:字符串字面量默认进.data挤爆栈,致固件空载正常、收命令即复位。含avr-size/nm/objdump定位、PSTR/PROGMEM正解、%S与%s区别。触发:AVR复位、.data异常大、avr-size。
+description: AVR RAM 溢出：字符串字面量默认进 .data 挤爆栈，致固件空载正常、收命令即复位。avr-size/nm/objdump 定位、PSTR/PROGMEM 正解、%S 与 %s 区别。
 agent_created: true
 ---
 # AVR Flash vs RAM: the silent .data overflow

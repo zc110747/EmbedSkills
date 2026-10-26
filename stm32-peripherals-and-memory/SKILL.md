@@ -1,6 +1,6 @@
 ---
 name: stm32-peripherals-and-memory
-description: STM32(H7/F4) 外设驱动与缓存/MPU 一致性判据：引脚映射、DCMI/SPI 屏/SD/QSPI/USB 实测坑、DMA 缓冲选址。适用于"引脚映射""D-Cache 要不要关""MPU 怎么配""DMA 缓冲放哪"等请求。
+description: STM32 H7/F4 外设与缓存一致性：引脚映射、DCMI/SPI 屏/SD/QSPI/USB 实测坑、DMA 缓冲选址、D-Cache 与 MPU 配置判据。
 agent_created: true
 ---
 

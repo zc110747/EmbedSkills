@@ -1,6 +1,6 @@
 ---
 name: win-batch-sandbox-probe
-description: Windows批处理坑与沙箱等效验证:块内echo裸括号提前闭合、Python subprocess真跑.bat、进程树回收、shell追加重写覆盖、file-history救援。触发:bat报此时不应有or、沙箱跑bat、追加没生效、文件开头被覆盖。
+description: Windows 批处理坑与沙箱等效验证：块内 echo 裸括号提前闭合、Python subprocess 真跑 .bat、进程树回收、shell 追加重写覆盖、file-history 救援。
 agent_created: true
 ---
 # Windows 批处理坑 + 沙箱等效验证

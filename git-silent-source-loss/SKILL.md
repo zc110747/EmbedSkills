@@ -1,6 +1,6 @@
 ---
 name: git-silent-source-loss
-description: 源文件凭空消失/换机编译不过:.gitignore误匹配源文件+git add静默跳过。含三步定位(check-ignore/log)、修复(!例外+注释)、类案清单。触发:文件不见了、git add不生效、clone缺文件、does not contain main module。
+description: 源文件凭空消失/换机编译不过：.gitignore 误匹配源文件 + git add 静默跳过。三步定位（check-ignore / log）、! 例外修复、类案清单。
 agent_created: true
 ---
 # git 静默吞源文件：`.gitignore` 误匹配 + `git add` 不报错

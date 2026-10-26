@@ -1,6 +1,6 @@
 ---
 name: app-webview-shell
-description: 用系统 WebView 把网页包成桌面/手机外壳（WinForms WebView2、Android WebView）：三态启动、导航看门狗、离线菜单、进度桥接、离屏抓图验收。触发：网页套壳、启动白屏、离线要提示、抓图空白。
+description: 网页套壳（WinForms WebView2 / Android WebView）：三态启动、导航看门狗、离线菜单、进度桥接注入、离屏抓图验收。症状：启动白屏、抓图空白。
 agent_created: true
 ---
 

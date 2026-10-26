@@ -1,6 +1,6 @@
 ---
 name: arm-photo-texturing
-description: 用实拍照片给刚体/机械臂模型贴真实纹理(Level3→4视觉增强,非几何重建):大面法向判定、拍摄协议、四角定位、透视校正、three.js按面材质与envMap。触发:照片贴图、透视校正、数字孪生视觉增强。
+description: 用实拍照片给刚体/机械臂模型贴真实纹理（视觉增强，非几何重建）：大面法向判定、拍摄协议、四角定位、透视校正、three.js 按面材质与 envMap。
 agent_created: true
 ---
 # 实拍照片 → 3D 模型纹理

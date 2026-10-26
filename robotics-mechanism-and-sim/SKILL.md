@@ -1,6 +1,6 @@
 ---
 name: robotics-mechanism-and-sim
-description: 机构几何真值的取证校核与物理仿真的对等验证。适用于"照片反解关节轴与连杆长""STEP 能不能当运动学真值""测量结果贴着区间端点""仿真没复现真机行为""FK 与 MuJoCo 残差多大算对""验收脚本全绿但可能是恒绿""外观改动会不会触发冻结基线"等请求。
+description: 机构几何真值取证与物理仿真对等验证：照片/CAD 反解关节轴与连杆长、容差登记、FK 与 MuJoCo 残差判据。症状：仿真没复现真机行为。
 agent_created: true
 ---
 

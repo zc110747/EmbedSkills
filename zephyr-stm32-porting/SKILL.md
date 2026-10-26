@@ -1,6 +1,6 @@
 ---
 name: zephyr-stm32-porting
-description: 在 STM32 上用 Zephyr 移植显示与外设：west 构建、设备树 overlay、LVGL 集成、GBK 点阵字库与 ST7789 点亮。适用于"Zephyr 移植""设备树 overlay""LVGL 集成""ST7789 全黑"等请求。
+description: 裸机外设搬进 Zephyr：west 工作区、设备树 overlay、时钟树、LVGL 集成、GBK 点阵字库与 ST7789 点亮。症状：ST7789 全黑。
 agent_created: true
 ---
 

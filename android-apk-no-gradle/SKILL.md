@@ -1,6 +1,6 @@
 ---
 name: android-apk-no-gradle
-description: 不装 Gradle 也能量产可安装 APK：aapt2→javac→d8→zipalign→apksigner 全链路、固定签名、图标白边与真机安装坑。触发：离线构建 APK、机器没有 Gradle、apk 装不上、桌面图标白边、INSTALL_FAILED_ABORTED。
+description: 不装 Gradle 量产 APK：aapt2→javac→d8→zipalign→apksigner 链路、固定签名可覆盖升级、图标白边、真机 INSTALL_FAILED_ABORTED。
 agent_created: true
 ---
 

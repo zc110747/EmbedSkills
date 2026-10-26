@@ -46,7 +46,7 @@ Bootloader + App 共存于同一片内部 Flash，需**两套独立构建 + 固�
 - **跳转前清环境**与**擦写引擎放 AXI SRAM（绝不放 DTCM）**，
   详见 `stm32-peripherals-and-memory/references/h7-flash-bootloader.md`。
 - **防砖**：任何校验失败在擦写前 abort，已运行 App 不被破坏。
-- 验收方法（gdb 直调编程函数与 Flash 回读）见 `embedded-verification-acceptance`。
+- 验收方法（gdb 直调编程函数与 Flash 回读）见 `verification-and-acceptance`。
 
 ## 三、LVGL 多页面 UI 拆分约定
 

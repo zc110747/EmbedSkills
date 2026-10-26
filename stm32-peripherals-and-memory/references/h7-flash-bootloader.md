@@ -25,5 +25,5 @@ H7 的 read-while-write 会让总线停滞但**不 HardFault**。所以从 bank1
 ## 6. 跳转 App 序列（缺一不可）
 跳前必须：`HAL_DeInit` / 关全局中断 / 关 MPU / 关 I-D Cache / 设 MSP / 重定位 VTOR / `__enable_irq`（清 PRIMASK 残留）。
 - **App 工程必须提供 `SysTick_Handler`** 且 `main()` 开头 `__enable_irq()`，否则 `HAL_Delay` 卡死（缺 handler → 链到 `Default_Handler` 死循环；bootloader 留 PRIMASK=1 未恢复 → 全局中断关死）。
-- 验证链路（gdb 直调编程函数、Flash 回读）见 `embedded-verification-acceptance`。
+- 验证链路（gdb 直调编程函数、Flash 回读）见 `verification-and-acceptance`。
 - **擦写引擎放 AXI SRAM(0x24000000)**，绝不放 DTCM（见第 1 节）。

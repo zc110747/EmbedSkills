@@ -1,6 +1,6 @@
 ---
 name: app-cpp20-coroutine-runtime
-description: 自建/使用 C++20 协程运行时的判据与静默失败：header-only 的 inline/ODR 漏网、generation 计数替代锁、帧归属与泄漏断言、定时器堆惰性删除、通道背压。触发：C++20 协程、co_await 卡住、双重 resume、协程帧泄漏、重复符号。
+description: C++20 协程运行时的静默失败：co_await 卡住、双重 resume、协程帧泄漏、header-only 重复符号、定时器堆惰性删除、通道背压。
 agent_created: true
 ---
 

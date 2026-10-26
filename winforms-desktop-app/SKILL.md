@@ -1,6 +1,6 @@
 ---
 name: winforms-desktop-app
-description: C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备、外部 CLI 集成、同一 exe 兼作命令行、运行期条件跳过的测试。触发：WinForms 界面、NAudio 播放、自绘控件被裁、WFO1000、GUI 当 CLI。
+description: C#/.NET WinForms：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备、同一 exe 兼作 CLI、WFO1000 与 DefaultValue。
 agent_created: true
 ---
 

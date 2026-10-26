@@ -1,6 +1,6 @@
 ---
 name: robotics-link-diagnostics
-description: 上位机↔机械臂后端链路的诊断与验收：串口/字节层、TCP 与 WebSocket 关节级链路的"谁引起谁跟随"、origin 语义、命令门控、新入口分层纪律与端到端验收判据。适用于"串口偶发不执行""加了外部入口后画面不对""两条链路口径不一致""e2e 出现与代码无关的假 FAIL"等请求。
+description: 上位机↔机械臂链路诊断：串口/字节层、TCP 与 WebSocket 关节级链路的「谁引起谁跟随」、origin 语义、命令门控。症状：偶发不执行、两条链路口径不一致。
 agent_created: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: ra8d1-fsp-platform-notes
-description: Renesas RA8D1（R7FA8D1BH，Cortex-M85）FSP 平台经验：内存映射、GLCDC/MIPI DSI、xSPI/OSPI、SDRAM、pyOCD 烧录、SWD 取证。触发：RA8D1、R7FA8D1、FSP、GLCDC、r_ospi_b、OSPI、QSPI 读不到 ID。
+description: RA8D1（R7FA8D1BH / Cortex-M85）FSP 平台：内存映射、GLCDC 与 MIPI DSI、xSPI/OSPI（r_ospi_b）、SDRAM、SWD 取证。症状：显屏不出图、OSPI 读不到 ID。
 agent_created: true
 ---
 

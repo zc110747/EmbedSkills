@@ -1,6 +1,6 @@
 # 负向对照：证明**验收脚本**有牙齿
 
-配套 `app-host-load-acceptance/SKILL.md` §3。
+配套 [`host-load-playbook.md`](./host-load-playbook.md) §3。
 
 ---
 

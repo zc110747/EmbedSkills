@@ -1,7 +1,7 @@
 # 一键构建 / 启动脚本：三个平台坑
 
 配套 `app-select-relay-server/SKILL.md`。`.bat` 的解析规则、`set /a` 陷阱、沙箱跑批处理的
-等效验证见 `win-batch-sandbox-probe` 与 `embedded-verification-acceptance/references/bat-script-rules.md`，
+等效验证见 `win-batch-sandbox-probe` 与 `verification-and-acceptance/references/bat-script-rules.md`，
 这里只写**本项目新增、且与"上位机服务"直接相关**的三条。
 
 ---

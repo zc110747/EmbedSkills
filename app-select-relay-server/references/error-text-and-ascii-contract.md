@@ -123,4 +123,4 @@ std::string last_socket_error_text() {
 的 stdout/stderr 全量收集，断言 `all(b < 0x80 for b in output)`。
 
 - 这条测试在"只有正常路径"时**恒为真**，必须有**突发断开**场景才有效；
-- 所以它要挂在**规模/压力场景**里（见 `app-host-load-acceptance`），不是挂在"连两个客户端"的场景里。
+- 所以它要挂在**规模/压力场景**里（见 `verification-and-acceptance`），不是挂在"连两个客户端"的场景里。
