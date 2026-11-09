@@ -49,14 +49,23 @@ agent_created: true
 3. **有出处** —— 引脚、寄存器、时钟、型号都核对过，未核对显式标注。
 4. **只写反直觉的部分** —— 常识不必写。
 
-## 当前规模（2026-10-26）
+## 当前规模（2026-11-09）
 
-**41 skills / 130 references / 4885 行 SKILL.md / 16285 行参考资料 / 11 个脚本**
+**38 skills / 135 references / 4490 行 SKILL.md / 16726 行参考资料 / 11 个脚本**
 （9 个随 skill + 仓根 `sync_skills.sh`、`lint_skills.py`）。
 
-- 41 条 description 全部 **≤120 字符**，常驻 **3,400 字符 / 7.1 KB**（最长 117、平均 82）。
+- 38 条 description 全部 **≤120 字符**，常驻 **3,119 字符 / 6.5 KB**（最长 117、平均 82）。
   结构约定：**「机制 + 症状」双段式**，不再写「适用于…等请求」的同义堆砌。
   `lint_skills.py`：>120 只 WARN，>150 才 error。
+- **2026-11-09 合并 3 组（41 → 38）**，旧名已不存在，任何引用一律用新名：
+  `winforms-desktop-app` + `wpf-realtime-sim` → **`dotnet-desktop-app`**
+  （WPF 原文 → `references/wpf-realtime-dashboard.md`）
+  `robotics-mechanism-and-sim` + `truth-source-and-model-vendoring` → **`model-truth-and-sim`**
+  `win-batch-sandbox-probe` + `git-silent-source-loss` → **`windows-shell-traps`**
+  （bat 语法 / 沙箱跑 bat / 截断恢复 / git 忽略 四篇 references）
+- **写作口径（2026-11-09 用户明确）**：正文**不写具体项目目录、工程代号、板型实例、
+  内部文件名**，也不写「本项目/本工程」叙事；只留可迁移的知识点、踩坑判据、解决思路。
+  说明性示例用 `<repo>` / `<module-root>` / 通用组件名。
 - **2026-10-26 合并 5 组（46 → 41）**，旧名已不存在，任何引用一律用新名：
   `ra8d1-vscode-pyocd-debug` → `pyocd-flm-inject-debug`（+ `references/ra8d1-instance.md`）
   `mcu-code-style-apply` → `mcu-code-style`（+ `references/apply-to-legacy-project.md`）
@@ -67,7 +76,8 @@ agent_created: true
   接口粒度 / 第三方边界三条规则）。旧名已不存在，任何引用一律用新名。
 - `sync_skills.sh` 纳管清单 = **两侧都扫再取并集**（原只扫全局，`--restore` 补不上
   镜像独有目录，2026-10-19 修）；`DENYLIST` 含 `README.md` / `sync_skills.sh` / `lint_skills.py`。
-- 正文 >6 KB 的有 20 篇（UTF-8 字节口径，最大 `ra8d1-fsp-platform-notes` 19.3 KB）**暂不瘦身**：
+- 正文 >6 KB 的有 20 篇（UTF-8 字节口径，最大 `ra8d1-fsp-platform-notes` 19.8 KB、
+  `arm-photo-texturing` 17.1 KB、`mcu-code-style` 16.1 KB）**暂不瘦身**：
   密度高无水分，且属 L2 按需加载；要动就下沉 `references/`，不砍判据。
 
 ## 去重操作的判据（相似度用不上）
