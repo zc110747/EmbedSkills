@@ -4,7 +4,7 @@
 frontier gap** = 播放头刻意落后播放列表边缘的段数 × 段长（hls.js 默认 `liveSyncDurationCount:3`）。
 
 **关键物理约束**：MediaMTX mpegts 只能在**关键帧**处起新段 → 段长被上游 GOP 钳制（GOP 1s⇒1s 段、
-GOP 4s⇒4s 段）。**降 HLS 时延第一步是推流端 GOP≈1s**（`-g fps -keyint_min fps`，camera-agent `--auto`
+GOP 4s⇒4s 段）。**降 HLS 时延第一步是推流端 GOP≈1s**（`-g fps -keyint_min fps`，采集端 `--auto`
 已内置 keyint=fps 修正）。
 
 **实测数据**（`scripts/hls_latency_probe.js A|B|C`：chromium + 同源注入 hls.js，读 level details 的

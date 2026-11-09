@@ -306,6 +306,6 @@ int main(void) {
 
 - `references/cpp-on-mcu-patterns.md` — 完整可编译范例：GPIO 四段式、I2C 双层继承、
   DAC 通道编译期映射、`extern "C"` 三种用法对照、`MEM_ALLOC` 全集与接入步骤、
-  构建验证清单、本工程源码索引。
+  构建验证清单、源码组织索引。
 - 构建骨架与 Keil 移植：`stm32-build-and-scaffold`。
 - C 代码规范（静态状态封装与注释）：`mcu-code-style`。外设与引脚判据：`stm32-peripherals-and-memory`。

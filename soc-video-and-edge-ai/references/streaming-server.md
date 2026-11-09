@@ -18,7 +18,7 @@
 | 服务端 (Go) | HTTP API、媒体服务器生命周期管理、WebRTC 信令代理、HLS 反向代理、摄像头注册/发现、健康检查 | `cmd/<svc>/main.go`、`internal/server`、`internal/<media>/manager.go`、`internal/api/*` |
 | MediaMTX（子进程） | 媒体服务器：RTSP 收流 + WebRTC/HLS 出流，**由服务端拉起并写动态配置** | `internal/<media>/manager.go` 的 `GenerateConfig()` |
 | 推流端（C++/GStreamer） | RTSP Publisher；换真机只换采集源 | 见 `rtsp-agent.md` |
-| 前端（Vue3+Vite+hls.js） | WebRTC 优先，超时后自动切 HLS 兜底 | `web/src/.../player.ts`、`VideoPlayer.vue` |
+| 前端（Vue3+Vite+hls.js） | WebRTC 优先，超时后自动切 HLS 兜底 | 播放器模块 + 播放器组件 |
 
 ## MediaMTX 集成要点
 

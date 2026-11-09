@@ -1,4 +1,4 @@
-# Skills 索引（全局 `~/.workbuddy/skills/`，本表列 41 个）
+# Skills 索引（全局 `~/.workbuddy/skills/`，本表列 38 个）
 
 > **每个 skill 的 name + description 由宿主每会话自动注入**，本表只是速查索引，不重复描述。
 > 细节一律放各 skill 的 `references/`，**按需读取，不占常驻上下文**。
@@ -41,12 +41,11 @@
 |---|---|
 | `soc-video-and-edge-ai` | RTSP 推流 agent、流媒体服务端（WebRTC/HLS）、零依赖边缘 AI 检测跟踪管线 |
 
-## 前端 / Windows GUI 取证（2）
+## 前端 / Windows GUI 取证（1）
 
 | Skill | 一句话 |
 |---|---|
 | `visual-verification` | 看不到界面时怎么验：Web 侧（无浏览器时打包探针 / SSR 渲染探针 / WebGL 首帧逐帧取证 / canvas 像素跨度）与 Windows GUI 侧（BitBlt 抓客户区、DPI 感知点击、纯 Python PNG 裁剪放大、单调用编排） |
-| `wpf-realtime-sim` | WPF+MVVM 实时仿真/遥测看板：解耦后台步进线程、30FPS 刷新、自更新 Canvas 趋势图、暗色主题、离屏 PNG 验证 |
 
 ## 静态站 / WebView 套壳（4）
 
@@ -61,7 +60,7 @@
 
 | Skill | 一句话 |
 |---|---|
-| `winforms-desktop-app` | C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备处理、外部 CLI 集成、同一个 exe 兼作命令行工具（`AttachConsole` 顺序陷阱）、运行期条件跳过的测试与发布 |
+| `dotnet-desktop-app` | .NET 桌面（WinForms/WPF）：自绘圆角控件的 DPI 与裁剪、NAudio 3.x 播放器生命周期与无音频设备、外部 CLI 集成、同一 exe 兼作命令行（`AttachConsole` 顺序）、固定步长与自绘实时曲线、无消息泵下的离屏 PNG 验图 |
 | `piper-offline-tts` | Piper 本地离线 TTS 集成：CLI 契约（正文走 stdin、输出用 -f）、长文本无实际上限的实测方法、喂给 TTS 前的文本准备（章节抽取 / 仅接受 UTF-8 / 非目标语言闸门）、运行时与模型的获取及哈希/许可核对、WAV 原子落地与解码校验 |
 
 ## 上位机应用层（C++20 协程 / 网络服务）（2）
@@ -82,17 +81,16 @@
 | `replica-mock-harness` | 替身进程验收：没有目标程序时验证「读地址→指针链→写值→回读」整条接线，PASS/FAIL/SKIP 三分类把「环境缺位点」与「接线坏了」分开 |
 | `replica-ui-fidelity` | 从参考截图逐像素反推复刻界面：布局度量标定、DPI 缩放、字号实测标定、色值采样、自绘控件与真实子窗口遮挡、像素级复验 |
 
-## 机器人 / 多物理场（5）
+## 机器人 / 多物理场（4）
 
 | Skill | 一句话 |
 |---|---|
-| `truth-source-and-model-vendoring` | 同一份真值在多处实现/多份官方模型之间漂移的取证、修法与防复发 |
-| `robotics-mechanism-and-sim` | 机构几何真值取证（照片/CAD 反解）与 MuJoCo 对等实现、容差登记、判据验证 |
+| `model-truth-and-sim` | 唯一真值与仿真对等：重复实现的静默漂移、选择器与唯一解析函数、语义核心哈希、容差登记制、判据必须会红（跨批 + 注入）、几何/物理真值的来源与能力边界 |
 | `robotics-link-diagnostics` | 上位机 ↔ 机械臂链路诊断：串口/TCP/WS 传输、origin 语义、跟随抑制、验收口径 |
 | `arm-photo-texturing` | 实拍照片给刚体/机械臂模型贴真实纹理（Level3→4 视觉增强，非几何重建）：大面法向判定、拍摄协议、四角定位、透视校正、three.js 按面材质与 envMap |
 | `motor-telemetry-alias-proof` | 读数上蹿下跳到底是欠采样旋转波形、真噪声还是饱和钳位：按相位分箱看离散度塌缩，配物理律/链路闭合/混叠比三判据 |
 
-## 工具类（6）
+## 工具类（5）
 
 | Skill | 一句话 |
 |---|---|
@@ -100,8 +98,7 @@
 | `pyocd-flm-inject-debug` | 芯片无 pyOCD 内建 target / pack target 在 DAP 上初始化失败：`pyocd_user.py` 钩子注入 memory map + FLM，打通烧录与 cortex-debug；含 TrustZone（RA8D1）实例 |
 | `mail-weekly-digest` | 指定周期的邮箱汇总周报，产出深色极简 HTML 并预览 |
 | `deterministic-clock-testing` | 把时间抽象成可注入 TimerLike+FakeTimer，让依赖延迟/节流/超时/重试的代码可确定性测试（无真实 sleep） |
-| `git-silent-source-loss` | 源文件凭空消失/换机编译不过：.gitignore 误匹配源文件 + git add 静默跳过；三步定位、修复(!例外+注释)、类案清单 |
-| `win-batch-sandbox-probe` | Windows 批处理坑与沙箱等效验证：块内 echo 裸括号提前闭合、Python subprocess 真跑 .bat、进程树回收、shell 追加重写覆盖、file-history 救援 |
+| `windows-shell-traps` | Windows 脚本与文件操作的静默失败：bat 块内裸括号与 `@echo on` trace、Python subprocess 真跑 .bat 与进程树回收、同名工具被系统版顶包、追加重定向截断、.gitignore 吞源文件、file-history 恢复 |
 
 ## 维护约定
 
@@ -149,3 +146,11 @@
   `description` 全部重写为「机制 + 症状」：41 条 **5,899 → 3,400 字符**（7.1 KB，省 42%），
   最长 117、平均 82，全部 ≤120。旧目录退役到 `~/.workbuddy/skills.retired-2026-10-26/`（8 个），
   备份 `~/.workbuddy/skills.bak-20261026/`。本表补齐此前漏登的「静态站 / WebView 套壳」4 个。
+- **2026-11-09（去项目化 + 再合并）**：**41 → 38**，3 组同源合并：
+  `dotnet-desktop-app`（新）← `winforms-desktop-app` + `wpf-realtime-sim`、
+  `model-truth-and-sim`（新）← `robotics-mechanism-and-sim` + `truth-source-and-model-vendoring`、
+  `windows-shell-traps`（新）← `win-batch-sandbox-probe` + `git-silent-source-loss`。
+  正文按「只留知识点 / 踩坑 / 解决思路」重写，删除工程代号、板型实例、具体目录与文件名；
+  细节下沉 `references/`（130 → **135** 篇，零删除）。`soc-video-and-edge-ai` 的
+  `references/video-server.md` 更名 `streaming-server.md`。旧目录退役到
+  `~/.workbuddy/skills.retired-20261109/`，备份 `~/.workbuddy/skills.bak-20261109/`。

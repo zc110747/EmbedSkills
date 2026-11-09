@@ -41,7 +41,7 @@ en_US-ljspeech-medium.onnx.json   MD5  0668112b8b3ac5bb4b12c2b1a366776a
 - **保留**小而关键的元数据入库：`models/voice-metadata.json`、`MODEL_CARD` 等
   —— 它们让"这是什么声音、什么许可"可查，且体积可忽略。
 - csproj **不要**把 `models/`、`tools/` 拷进输出目录；运行时用"从程序集目录向上查找"定位
-  （见 `winforms-desktop-app/references/external-cli-integration.md` §八）。
+  （见 `dotnet-desktop-app/references/external-cli-integration.md` §八）。
   好处：`dotnet publish` 产物只有程序本体，模型更新不用重新发布。
 
 ## 四、下载脚本要点（PowerShell）

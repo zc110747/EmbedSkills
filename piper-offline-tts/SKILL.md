@@ -56,4 +56,4 @@ agent_created: true
   剥语法但不丢文字（表格/链接/实体的处理）、UTF-8 四重编码判据、非目标语言在合成前中止的做法。
 - `references/model-provisioning-and-licensing.md` — 运行时与模型的下载地址、哈希核对、目录布局、许可口径与可复现下载脚本要点。
 - 子进程调用的通用配方（`ArgumentList` / 双管道防死锁 / 超时 / 杀进程树）见
-  `winforms-desktop-app/references/external-cli-integration.md`。
+  `dotnet-desktop-app/references/external-cli-integration.md`。

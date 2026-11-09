@@ -97,7 +97,7 @@ agent_created: true
 ## 详细资料
 
 - `references/rtsp-agent.md` — 推流端接口契约、状态机、退避、单测、端到端验收
-- `references/video-server.md` — MediaMTX 集成、WHEP/HLS 代理、一键脚本、沙箱诊断
+- `references/streaming-server.md` — MediaMTX 集成、WHEP/HLS 代理、一键脚本、沙箱诊断
 - `references/edge-ai-pipeline.md` — tee 取帧、采样节拍、语义字段、构建与上报通道
 - `references/camera-capture-forensics.md` — 枚举≠可用、锐度量化、RTSP 取证、阈值标定与证据载体
 - `references/recorder-and-mode-gating.md` — 模式白名单门控、原字节保真、会话切分两条判据、灌合成帧的陷阱

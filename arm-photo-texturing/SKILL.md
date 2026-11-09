@@ -140,7 +140,7 @@ corners = corners_rot @ axes.T + mean      # 旋回
 ```
 
 - 排序成 `[TL, TR, BR, BL]`：按 y 分上下两半，各按 x 排。
-- **分割**：白底暗件，灰度阈值（本项目沿用手工标定的 90）。
+- **分割**：白底暗件，灰度阈值按实拍样本手工标定（换光照/换件必须重标）。
 - **去噪**：先腐蚀再膨胀（开运算）去掉孤立噪点，但**不改变整体外轮廓**。
   没有 cv2/scipy 时用 `PIL.ImageFilter.MinFilter/MaxFilter`。
 - ⚠️ **必须目视复核**：PCA 在背景不干净（阴影 / 线缆 / 别的零件）时会给出
@@ -222,7 +222,7 @@ homography 有浮点误差（反投影出 `99.9999998`）会把边界行判成"�
 
 ### ★★ 别名的键是 `enumerate(details)` 的**下标** —— 给 details 加件会静默挤错它
 
-实测（本项目：给 `forearm_link` 加一段"腕端补料"）：清单推导遍历的是
+实测（给某连杆加一段"补料件"）：清单推导遍历的是
 `geometry`(plate) **加上 details 里的所有 plate**，而别名键用的是 **details 数组下标**
 （`forearm_brace` 就是该 link 的 index 3）。于是"给 details 加个件"**不是无副作用的操作**：
 

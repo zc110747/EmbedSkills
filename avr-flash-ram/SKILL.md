@@ -25,7 +25,7 @@ explicitly put it in flash. On a 2 KB part (ATmega328P) this fills RAM:
 avr-size -A firmware.elf | grep -E "\.text|\.data|\.bss"
 # RAM = .data + .bss ; stack headroom = 2048 - (256 + .data + .bss)
 avr-nm -S --size-sort -t d firmware.elf | grep -iE ' [dD] '   # named .data symbols
-avr-objdump -s -j .data firmware.elf | grep -iE "本项目|commands|STATUS"  # strings in RAM!
+avr-objdump -s -j .data firmware.elf | grep -iE "STATUS|ERROR|READY"  # strings in RAM!
 ```
 If you see your help/status text inside `.data`, that's the smoking gun.
 

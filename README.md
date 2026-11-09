@@ -2,14 +2,14 @@
 
 > 一位嵌入式固件工程师与 AI Agent 协作沉淀下来的 **Skill 库** —— 把「踩过的坑」写成 Agent 能直接调用的判据与配方。
 >
-> 当前 **41 个 Skill / 130 篇 references / 41 篇 SKILL.md（约 4885 行）/ 16285 行参考资料 / 11 个脚本**，全部 `agent_created: true`。
+> 当前 **38 个 Skill / 135 篇 references / 38 篇 SKILL.md（约 4490 行）/ 16726 行参考资料 / 11 个脚本**，全部 `agent_created: true`。
 >
 > ✅ 与本机 `~/.workbuddy/skills/` **已逐字节一致**（`bash sync_skills.sh --check` → `RESULT: IDENTICAL`）。
 > 提交前建议再跑一次 `python lint_skills.py`（结构一致性，见「怎么用 · 4」）。
 
 <p align="left">
-  <img alt="skills" src="https://img.shields.io/badge/Skills-41-2b6cb0">
-  <img alt="references" src="https://img.shields.io/badge/references-130-2f855a">
+  <img alt="skills" src="https://img.shields.io/badge/Skills-38-2b6cb0">
+  <img alt="references" src="https://img.shields.io/badge/references-135-2f855a">
   <img alt="scripts" src="https://img.shields.io/badge/scripts-11-805ad5">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-718096">
   <img alt="platform" src="https://img.shields.io/badge/platform-MCU%20%7C%20SOC%20%7C%20%E4%B8%8A%E4%BD%8D%E6%9C%BA-c05621">
@@ -55,7 +55,7 @@ EmbedSkills/
 
 | 层级 | 内容 | 何时加载 | 成本 |
 |---|---|---|---|
-| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 41 条 ≈ 3.4 K 字符 / **7.1 KB** |
+| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 38 条 ≈ 3.1 K 字符 / **6.5 KB** |
 | **L2 · 按需** | `SKILL.md` 正文（目标 2~4 KB） | 触发词命中时 | 单篇 ≈ 1/5 上下文 |
 | **L3 · 精确** | `references/*.md` | 正文指向时才读那一篇 | 按需，通常 0 |
 
@@ -63,7 +63,9 @@ EmbedSkills/
 报错对照表一律下沉到 `references/`。演进轨迹：2026-09 从 **39 个合并为 18 个**，常驻
 description 总量 26 KB → 约 3 KB；2026-10-19 把 42 条全部压到 ≤150 字符；2026-10-26
 **46 → 41 个**（合并 5 组同源 skill），description 从「功能清单堆砌」改写为
-「机制 + 症状」，41 条实测 **3,400 字符 / 7.1 KB**，最长 117、平均 82，全部 ≤120 字符。
+「机制 + 症状」，41 条实测 **3,400 字符 / 7.1 KB**，最长 117、平均 82，全部 ≤120 字符；
+2026-11-09 **41 → 38 个**（再合并 3 组同源 skill，正文按"只留判据、细节下沉"重写），
+38 条 description 合计 **3,119 字符 / 6.5 KB**，平均 82、最长 117。
 
 ---
 
@@ -100,7 +102,7 @@ description 总量 26 KB → 约 3 KB；2026-10-19 把 42 条全部压到 ≤150
                      │ lvgl-mcu  · mcu-logging                 │
                      ├─────────────────────────────────────────┤
                      │ soc-video-and-edge-ai                   │
-                     │ robotics-mechanism-and-sim              │
+                     │ model-truth-and-sim                     │
                      │ robotics-link-diagnostics               │
                      │ visual-verification                     │
                      ├─────────────────────────────────────────┤
@@ -163,7 +165,7 @@ description 总量 26 KB → 约 3 KB；2026-10-19 把 42 条全部压到 ≤150
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
-| [`winforms-desktop-app`](winforms-desktop-app/SKILL.md) | C#/.NET WinForms 桌面应用：自绘圆角控件的 DPI 与裁剪、NAudio 2.x→3.x 破坏性改名、`DeviceCount==0` 是合法环境、**WFO1000 与 `[DefaultValue]`**、同一个 exe 兼作 CLI（`AttachConsole` 顺序陷阱）、xUnit 2.x 没有 `Assert.Skip` | 「WinForms 自绘控件」「NAudio 播放」「GUI 当 CLI 用」 |
+| [`dotnet-desktop-app`](dotnet-desktop-app/SKILL.md) | .NET 桌面（WinForms/WPF）：自绘控件 DPI 与裁剪、NAudio 3.x 与无音频设备、同一 exe 兼作 CLI（`AttachConsole` 顺序）、实时曲线固定步长与不重建视觉树、离屏 PNG 验图 | 「WinForms 自绘控件」「WPF 实时看板」「GUI 当 CLI 用」 |
 | [`piper-offline-tts`](piper-offline-tts/SKILL.md) | Piper 本地离线 TTS 集成：CLI 契约（正文走 **stdin**、`-f` 出 WAV）、长文本实测能力、喂 TTS 前的文本准备（章节抽取 / 仅接受 UTF-8 / 非目标语言闸门）、模型哈希与许可核对、WAV 原子落地 | 「本地 TTS」「Markdown 转语音」「模型哈希核对」 |
 
 ### 复刻（逆向 → 替身 → 复现）（4）
@@ -175,22 +177,20 @@ description 总量 26 KB → 约 3 KB；2026-10-19 把 42 条全部压到 ≤150
 | [`replica-mock-harness`](replica-mock-harness/SKILL.md) | **没有目标程序时的验收**：自研替身进程验证「读地址→指针链→写值→回读」整条接线，PASS/FAIL/SKIP 三分类把「环境缺位点」与「接线坏了」分开，SKIP 清单即真机补验 TODO | 「替身进程怎么造」「验收脚本总报 FAIL」 |
 | [`replica-ui-fidelity`](replica-ui-fidelity/SKILL.md) | 从参考截图**逐像素反推**复刻界面：布局度量标定、DPI 缩放、字号实测标定、色值采样、自绘控件与真实子窗口遮挡、像素级复验 | 「照着截图把界面做出来」「DPI 缩放后全错位」 |
 
-### 机器人 / 多物理场（5）
+### 机器人 / 多物理场（4）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
-| [`truth-source-and-model-vendoring`](truth-source-and-model-vendoring/SKILL.md) | 同一份真值在多处实现、或多份官方模型之间的**静默漂移**：冻结基线、语义核心哈希、多实现互证 | 「URDF 与 MJCF 对不上」「Sim2Sim 一致性」 |
-| [`robotics-mechanism-and-sim`](robotics-mechanism-and-sim/SKILL.md) | 机构几何真值取证（照片/CAD 反解）与 MuJoCo 对等实现、容差登记、判据验证 | 「仿真没复现真机行为」 |
+| [`model-truth-and-sim`](model-truth-and-sim/SKILL.md) | **唯一真值与仿真对等**：重复实现的静默漂移、选择器与唯一解析函数、语义核心哈希、容差登记制、判据必须会红（跨批 + 注入）、几何/物理真值的来源与能力边界 | 「URDF 与 MJCF 对不上」「仿真没复现真机」「测试全绿却没覆盖」 |
 | [`robotics-link-diagnostics`](robotics-link-diagnostics/SKILL.md) | 上位机 ↔ 机械臂链路：串口/字节层、TCP/WS 关节级链路「谁引起谁跟随」、`origin` 语义、命令门控 | 「两条链路口径不一致」 |
 | [`arm-photo-texturing`](arm-photo-texturing/SKILL.md) | 实拍照片给刚体/机械臂模型贴真实纹理（Level3→4 视觉增强，非几何重建）：大面法向判定、拍摄协议、四角定位、透视校正、three.js 按面材质与 envMap | 「照片贴图」「透视校正」「数字孪生视觉增强」 |
 | [`motor-telemetry-alias-proof`](motor-telemetry-alias-proof/SKILL.md) | 读数上蹿下跳到底是欠采样旋转波形、真噪声还是饱和钳位：按相位分箱看离散度塌缩，配物理律/链路闭合/混叠比三判据 | 「PWM/相电流跳动」「波形像噪声」「数据在抖是 bug 还是采样」 |
 
-### 前端 / Windows GUI 取证（2）
+### 前端 / Windows GUI 取证（1）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
 | [`visual-verification`](visual-verification/SKILL.md) | **看不到界面时怎么验**（Web + Windows GUI 共用一套方法）：Web 侧沙箱封掉 Chromium 时用 esbuild 打包客户端模块打活服务、`react-dom/server` 渲染每个组件、WebGL 首帧逐帧取证；Windows 侧 ctypes+BitBlt 抓客户区、DPI 感知点击、纯 Python PNG 裁剪放大、单调用编排 | 「页面显示 undefined 却不报错」「GUI 截图」「自动化验收」「点击没反应」「DPI 缩放」 |
-| [`wpf-realtime-sim`](wpf-realtime-sim/SKILL.md) | WPF+MVVM 实时仿真/遥测看板：解耦后台步进线程、30FPS 刷新、自更新 Canvas 趋势图、暗色主题(含 ComboBox 模板)、离屏 PNG 验证 | 「WPF 实时仿真」「无图表库趋势图」「暗色 ComboBox」 |
 
 ### 静态站 / WebView 套壳（4）
 
@@ -201,7 +201,7 @@ description 总量 26 KB → 约 3 KB；2026-10-19 把 42 条全部压到 ≤150
 | [`app-webview-shell`](app-webview-shell/SKILL.md) | 网页套壳（WinForms WebView2 / 系统 Android WebView）：三态启动、导航看门狗、离线错误菜单、进度桥接注入、离屏抓图验收 | 「网页套壳」「启动白屏」「离线要提示」「抓图空白」 |
 | [`android-apk-no-gradle`](android-apk-no-gradle/SKILL.md) | 不装 Gradle 也能量产 APK：aapt2→javac→d8→zipalign→apksigner 全链路、固定签名可覆盖升级、图标白边与真机安装坑 | 「机器没有 Gradle」「apk 装不上」「桌面图标白边」「INSTALL_FAILED_ABORTED」 |
 
-### 工具类（6）
+### 工具类（5）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
@@ -209,8 +209,7 @@ description 总量 26 KB → 约 3 KB；2026-10-19 把 42 条全部压到 ≤150
 | [`pyocd-flm-inject-debug`](pyocd-flm-inject-debug/SKILL.md) | 芯片无内建 pyOCD target、或 pack target 在 CMSIS-DAP 上初始化失败时：用 `pyocd_user.py` 的 `will_init_target` 钩子注入 memory map + 官方 FLM 闪存算法，打通烧录与 VSCode F5；含 TrustZone 芯片（RA8D1：4 个 FLM、SCons 构建、headless 自测脚本）实例 | 「pyocd 烧不了」「cortex-debug 连不上」「RA8D1 无法调试」 |
 | [`mail-weekly-digest`](mail-weekly-digest/SKILL.md) | 指定周期的邮箱汇总周报，统计收发/未读/附件并按来源归类，产出深色极简 HTML | 「邮箱周报」 |
 | [`deterministic-clock-testing`](deterministic-clock-testing/SKILL.md) | 把时间抽象成可注入 TimerLike+FakeTimer，让依赖延迟/节流/超时/重试的代码可确定性测试（无真实 sleep）：最小接口、FakeTimer 四要点、四类断言 | 「定时器测试」「节流测试」「flaky 测试」「假时钟」 |
-| [`git-silent-source-loss`](git-silent-source-loss/SKILL.md) | 源文件凭空消失/换机编译不过：.gitignore 误匹配源文件 + git add 静默跳过。三步定位、修复(!例外+注释)、类案清单 | 「文件不见了」「git add 不生效」「clone 缺文件」 |
-| [`win-batch-sandbox-probe`](win-batch-sandbox-probe/SKILL.md) | Windows 批处理坑与沙箱等效验证：块内 echo 裸括号提前闭合、Python subprocess 真跑 .bat、进程树回收、shell 追加重写覆盖、file-history 救援 | 「bat 报 此时不应有 or」「沙箱跑 bat」「追加没生效」 |
+| [`windows-shell-traps`](windows-shell-traps/SKILL.md) | **Windows 脚本与文件操作的静默失败**：bat 块内裸括号与 `@echo on` trace、Python subprocess 真跑 `.bat` 与进程树回收、同名工具被系统版顶包、追加重定向截断、`.gitignore` 吞源文件、file-history 恢复 | 「bat 报 此时不应有 or」「沙箱跑 bat」「追加没生效」「文件不见了」 |
 
 ---
 
@@ -224,7 +223,7 @@ Skill 之间**显式互相引用**，常用组合：
 | **板子「像死了」** | `mcu-debug-forensics`（先定性） → `stm32-peripherals-and-memory`（查缓存/MPU） → `mcu-logging`（补可观测性） |
 | **屏上显示不对** | `lvgl-mcu` → `stm32-peripherals-and-memory`（屏/总线） → `zephyr-stm32-porting`（若走 RTOS） |
 | **给设备加网页配置** | `embedded-config-portal` → `visual-verification`（无硬件验证前端） → `verification-and-acceptance` |
-| **改机构参数前** | `robotics-mechanism-and-sim`（量真值） → `truth-source-and-model-vendoring`（防漂移） → `robotics-link-diagnostics`（验链路） |
+| **改机构参数前** | `model-truth-and-sim`（量真值 + 防漂移） → `robotics-link-diagnostics`（验链路） |
 | **做一个上位机网络服务** | `app-cpp20-coroutine-runtime`（事件循环若是协程调度器） → `app-select-relay-server`（规模上限与运维契约） → `verification-and-acceptance`（压测验收） |
 | **服务「客户端一多就丢数据」** | `app-select-relay-server`（`FD_SET` 截断 / `backlog`） → `verification-and-acceptance`（复现 + 负向对照） |
 | **要复刻一个外部工具** | `replica-recon`（先摸清它怎么做的） → `replica-memory-engine`（读写引擎） → `replica-mock-harness`（没原件就造替身验收） → `replica-ui-fidelity`（界面 1:1） |
@@ -245,7 +244,7 @@ Skill 之间**显式互相引用**，常用组合：
 
 ### ⚠️ 部分适合
 
-- **纯 Linux 应用开发者** —— 只有 `visual-verification`、`truth-source-and-model-vendoring`
+- **纯 Linux 应用开发者** —— 只有 `visual-verification`、`model-truth-and-sim`
   两篇与硬件无关，其余价值有限。
 - **用 HAL 库照着例程走的人** —— 本仓刻意**不写**「怎么调 HAL 函数」，只写反直觉部分，
   你会觉得很多基础内容「没写」。
@@ -453,6 +452,26 @@ python lint_skills.py            # 结构一致性校验（frontmatter / ≤150 
       - 旧目录整体退役到 `~/.workbuddy/skills.retired-2026-10-26/`（8 个），合并前整份
         备份到 `~/.workbuddy/skills.bak-20261026/`。
 
+- [x] **2026-11-09** 按「只留知识点 / 踩坑 / 解决思路」再精简（**41 → 38 个 Skill / 130 → 135 篇 references**）
+      - 合并 3 组同源 skill（细节一律下沉 `references/`，零删除）：
+        - `dotnet-desktop-app` ← `winforms-desktop-app` + `wpf-realtime-sim`：同为 .NET 桌面。
+          WinForms 侧留自绘 / DPI / CLI 判据，WPF 侧留固定步长 / 自绘曲线 / 离屏渲染判据；
+          WPF 原文（配速器、Canvas 图、ComboBox 模板、headless 渲染代码）整理为
+          `references/wpf-realtime-dashboard.md`
+        - `model-truth-and-sim` ← `robotics-mechanism-and-sim` + `truth-source-and-model-vendoring`：
+          两篇主线都是「真值唯一 + 容差登记 + 判据必须会红」，8 篇 references 全部继承
+        - `windows-shell-traps` ← `win-batch-sandbox-probe` + `git-silent-source-loss`：
+          统一到「静默失败」这条主线（退出码 0 与 grep 命中都不算证据），
+          bat 语法 / 沙箱跑 bat / 截断与恢复 / git 忽略四块下沉为 references
+      - **去项目化**：正文删除工程代号、板型实例、具体目录与文件名（`video-server`、
+        `VideoPlayer`、`start-*.bat`、`<repo>/...` 等）以及「本项目 / 本工程」叙述，
+        只留换项目仍成立的判据；`soc-video-and-edge-ai` 的
+        `references/video-server.md` 更名 `streaming-server.md`
+      - SKILL.md 总行数 4,885 → 4,490；38 条 description 合计 3,400 → **3,119 字符**
+        （平均 82、最长 117，全部 ≤120）
+      - 退役 6 个旧目录到 `~/.workbuddy/skills.retired-20261109/`，
+        合并前整份备份到 `~/.workbuddy/skills.bak-20261109/`
+
 ### 进行中 / 计划
 
 - [x] ~~**解掉镜像漂移**~~ —— 2026-10-19 已完成，现为 `RESULT: IDENTICAL`。
@@ -462,8 +481,9 @@ python lint_skills.py            # 结构一致性校验（frontmatter / ≤150 
 - [x] ~~**去重合并**~~ —— 2026-10-26 已完成，46 → 41（5 组同源 skill 合并，内容零删除）。
 - [ ] **安装脚本** —— 让「全量安装」从手抄 `for` 循环变成 `install.sh` / `install.bat`（Windows 侧纯 ASCII、pause-on-error）。
 - [ ] **CI 一致性校验** —— `lint_skills.py` 已覆盖规则；还差把它挂到 pre-commit / GitHub Actions（`.github/` 目前为空）。
-- [ ] **正文偏大的 20 篇待分流** —— 按 UTF-8 字节数 >6 KB，最大 `ra8d1-fsp-platform-notes`(19.3 KB) /
-      `win-batch-sandbox-probe`(17.4 KB) / `arm-photo-texturing`(17.1 KB) / `mcu-code-style`(16.1 KB)。
+- [ ] **正文偏大的 20 篇待分流** —— 按 UTF-8 字节数 >6 KB，最大 `ra8d1-fsp-platform-notes`(19.8 KB) /
+      `arm-photo-texturing`(17.1 KB) / `mcu-code-style`(16.1 KB) / `mcu-cpp-development`(15.2 KB) /
+      `esp32-platform-notes`(15.1 KB)。
       内容密度高、无明显水分，属于「L2 按需加载」而非常驻成本，暂不动；若要瘦身，做法是
       **下沉到同 skill 的 `references/`（不删除内容）**，而不是砍判据。
 - [ ] **领域扩展** —— 边缘 AI 部署（ONNX / CMSIS-NN 量化链路）、嵌入式 Linux SOC（RK3568 摄像头/RTSP）方向仍偏薄。

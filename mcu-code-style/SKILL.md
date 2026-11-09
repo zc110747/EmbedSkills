@@ -7,7 +7,7 @@ agent_created: true
 
 # MCU C 代码规范（仅自研代码）
 
-> **适用范围**：只约束本工程**自研代码**（`app/`、`bsp/`、`sys_startup/` 中自研部分）。
+> **适用范围**：只约束目标工程的**自研代码**（`app/`、`bsp/`、`sys_startup/` 中自研部分）。
 > `Drivers/`、`third_party/`、HAL/CMSIS、RTOS 与中间件（LVGL / LwIP / TinyUSB / FatFs），
 > 以及 ST 提供的 `system_stm32h7xx.c` / `startup_*.s` / `stm32h7xx*.h` 等 CMSIS 文件，
 > 一律不套用本规范——它们是外部代码，改了就失去可升级性。细则见 §0。
