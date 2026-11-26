@@ -36,6 +36,24 @@ agent_created: true
 | H7 TIM 宏 | `__HAL_TIM_ENABLE/DISABLE/SET_COUNTER/CLEAR_FLAG` 都要 `TIM_HandleTypeDef*`（宏内取 `->Instance`），**不能传 `TIM2`**；要留常驻 handle |
 | 寄存器偏移 | 别凭印象读寄存器：`RCC_APB1LENR` 偏移 0xE8（不是 0x40）、`TIM_PSC` 0x28 / `TIM_ARR` 0x2C。读错偏移会得出"时钟没使能"之类的假结论 |
 | H7 bit-band | **不支持** F1/F4 式 peripheral bit-band，别写 `SRAM_BASE + bit*4` 映射；改用 `GPIOx->BSRR`（位号选置/复位，单次 32 位存储天然原子），**不要对 ODR 做 read-modify-write**（会与 DMA 抢同一寄存器） |
+| USB 复合设备内存 | 两个类**各自独立**的实例内存。ST 模板的静态分配器永远返回同一块：MSC 约 8 KB 会把 CDC 约 0.5 KB 整个盖住 → 盘在写 + 串口有流量时几百毫秒内 HardFault |
+| SD 传输方式 | PIO（CPU 搬 FIFO）免 D-Cache clean/invalidate、免 32 字节对齐、缓冲可放 DTCM（IDMA 到不了）；只有 CPU 忙不过来才换 IDMA |
+| USB FS 上限 | 理论 1.15 MB/s，BOT 每笔 CBW/CSW 开销后写 ~640 / 读 ~820 KB/s 已是物理上限；串口满载降 35% 是两个接口分同一条总线，不是 SD 变慢 |
+
+## USB 复合设备（MSC + CDC）
+
+- **顺序不能反**：介质初始化 → 挂载 → 必要时格式化 → 自检 → **卸载卷** → 启动 USB。
+  先起 USB 再格式化，主机会在探测期拿到"未就绪"并**缓存**失败状态，盘符要手动重扫才出来。
+- **没有 VBUS 检测脚就 `vbus_sensing_enable = DISABLE`**，否则内核认为无 VBUS、停在
+  B-session invalid 永不连接；关闭后靠 `GOTGCTL.BVALOEN|BVALOVAL` 强制会话有效。
+- **别用 GPIO 读 D+ 判断主机连接**：把引脚从 AF 切到 GPIO 会连带切断 PHY，读回恒 0。
+  看 `GINTSTS.SOF/USBRST` 与 `DSTS.SOFFN`。
+- **挂起回调要把 PHY 时钟放回来**：模板 `HAL_PCD_SuspendCallback()` 无条件关时钟而 Resume
+  不放行 ⇒ 主机挂起一次后设备永久失联。
+- CubeMX 生成的 `HAL_PCD_MspInit()` 可能重配你已在用的引脚（VBUS 检测脚恰是调试串口 TX 时，
+  日志从第一行起就发不出），移植必须逐行比对而不是整体复制。
+
+十条硬坑与吞吐基线见 `references/usb-composite-msc-cdc.md`。
 
 ## 判据与反模式
 
@@ -69,4 +87,6 @@ agent_created: true
 - `references/h7-flash-bootloader.md` — H7 内部 Flash 升级引擎：DTCM 不可执行、
   双 Bank 擦写取指、RWW 只 stall 不 fault、两阶段长度擦除、跳转 App 序列。
 - `references/uart-physical-bridge.md` — UART 物理层与 CDC↔UART 透明桥踩坑。
+- `references/usb-composite-msc-cdc.md` — MSC+CDC 复合设备：上电顺序、十条硬坑（VBUS 假检测、
+  句柄互相覆盖、挂起关时钟、缺 SYNCHRONIZE CACHE）、FS 吞吐基线与基准脚本前提。
 - 日志系统（环形缓冲、RTOS 双 TX 路径）以 `mcu-logging` 为准。

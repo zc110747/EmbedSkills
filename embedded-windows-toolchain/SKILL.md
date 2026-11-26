@@ -15,6 +15,7 @@ GStreamer 依赖）共用的环境搭建、构建执行与结果判据。只保�
 - 在 Windows 下跑 idf.py / west / cmake / ninja / cl.exe 构建
 - 出现"命令 exit 0 但没产出""改了代码行为没变""烧录器被占用""PowerShell 报红但实际成功"
 - 中文乱码、GBK 输出、`.bat` 执行碎片化、路径风格不一致
+- **什么都没改却每次重链**、产物名 `target` 与 `target.exe` 不一致、增量构建"看起来正常其实全量"
 
 ## 核心知识点
 
@@ -41,6 +42,10 @@ GStreamer 依赖）共用的环境搭建、构建执行与结果判据。只保�
 | `dir /s` 存在却**找不到文件** | 通配符只能出现在路径**最后一段** | 先枚举中间目录，再拼内层路径 |
 | `timeout 10 cmd` 报"无效语法" | PATH 上的 `timeout` 是 Windows 的 `TIMEOUT.EXE`，不是 coreutils | 用 `%SystemRoot%\System32\timeout.exe`，或先确认实际跑的是哪个程序 |
 | 从 Bash 调 `cmd //c` 被安全策略拦 | 宿主对 `cmd.exe` 的调用有校验，但**直接执行 `.bat` 可以** | 直接按路径执行 `.bat`，不要包一层 `cmd /c` |
+| `make` 什么都没改却**每次重链** | MinGW 的 `g++ -o target` 实际产出 `target.exe`，而 make 按**字面量** `target` 判存在 ⇒ 永远"不存在、需重建" | `CC_MACHINE := $(shell $(CC) -dumpmachine 2>/dev/null)`，含 `mingw/msys/cygwin` 则 `EXEEXT ?= .exe`，链接/clean/运行目标统一拼 `$(EXEEXT)`；判据用 `dumpmachine` 而非 `$(OS)`（Linux 上交叉产出 `.exe` 时 `$(OS)` 说不了话） |
+| 补了 `EXEEXT` 仍每次重链 | 规则先链接到构建目录再 `mv` 到输出目录，搬走后目标又"消失" —— 与上一条同症状的**第二个成因** | 直接链接到最终路径，不靠搬运；只补 `EXEEXT` 修不掉这一半 |
+| `-std=c++20` 报 unrecognized option | PATH 里排在前的是 Git 自带的旧 MinGW g++，不是 MSYS2 的那个 | 构建前把目标 `mingw64/bin` 前插，或调绝对路径；先 `command -v g++` 确认实际跑的是哪个 |
+| 按字面名判断产物存在，结论与 `ls` 不符 | MSYS2 下 `[ -f dir/target ]` 会把不存在的 `target` 解析成 `target.exe`（PATHEXT 语义） | 统计真实产物分布用 `ls dir \| grep -qx "target"`，不要用 `test -f` |
 
 详细取证（含原始数字与复现步骤）见 `references/console-and-batch-traps.md`。
 
@@ -54,6 +59,10 @@ GStreamer 依赖）共用的环境搭建、构建执行与结果判据。只保�
 - 反模式：用中文当 grep / 断言 pattern。GBK 输出下静默匹配失败形成假阴性，断言只用 ASCII。
 - 反模式：用 Git Bash 的 `ps` 找 Windows 原生进程。永远找不到，改用 `tasklist` / `netstat -ano` / `taskkill`。
 - 反模式：编译通过即认为运行期正确。零初始化合法，上游组件配置宏漏填新增必填字段只会在上电时 abort。
+- **构建通过 ≠ 增量构建正确**：同一源码连跑两遍，第二遍必须 **0 重链**（链接命令不重放、
+  产物 mtime 不变）。只看第一遍 PASS 会把"每次全量重链"当成正常——它照样成功，只是白干。
+- **改 `clean` 的语义会打断「构建 → clean → 运行」的一体化目标**：把产物也纳入 clean 后，
+  该目标立刻找不到可执行文件。要让运行目标自己删中间件，不复用 `clean`。
 - 反模式：一次改完多层版本迁移。启用一个编译分支后错误分层出现，一次只修一层并真机验证。
 - 决策：Kconfig 类宏门控只写在 C 的 `#if` 里，不写进 CMake 的 `if()`；`REQUIRES` 无条件列出。
 - 决策：运行期 `ESP_ERR_INVALID_ARG` 且参数来自上游组件配置宏 → 第一步 diff 该 struct 找新增必填字段。

@@ -49,14 +49,19 @@ agent_created: true
 3. **有出处** —— 引脚、寄存器、时钟、型号都核对过，未核对显式标注。
 4. **只写反直觉的部分** —— 常识不必写。
 
-## 当前规模（2026-11-09）
+## 当前规模（2026-11-26）
 
-**38 skills / 135 references / 4490 行 SKILL.md / 16726 行参考资料 / 11 个脚本**
+**39 skills / 136 references / 4616 行 SKILL.md / 16811 行参考资料 / 11 个脚本**
 （9 个随 skill + 仓根 `sync_skills.sh`、`lint_skills.py`）。
 
-- 38 条 description 全部 **≤120 字符**，常驻 **3,119 字符 / 6.5 KB**（最长 117、平均 82）。
+- 39 条 description 全部 **≤120 字符**，常驻 **3,184 字符 / 6.7 KB**（最长 117、平均 82）。
   结构约定：**「机制 + 症状」双段式**，不再写「适用于…等请求」的同义堆砌。
   `lint_skills.py`：>120 只 WARN，>150 才 error。
+- **2026-11-26 新增 `replica-runtime-takeover`（38 → 39）**：原版规则零复制地做新渲染层
+  —— 闭包内函数只能「全局唯一改名 + 同名 shim」拦、输入消息桥与定点坐标换算、
+  协程等待临时注入、状态单一真值与切换幂等、可逆还原（逐字节）判据。
+  同日回填 5 篇（USB MSC+CDC 复合设备 / MinGW `$(EXEEXT)` 增量重链 / 可信告警数 /
+  内容三向对应 / 无头视口尺寸），并修掉 `host-load-playbook` 里指向旧名的悬空指引。
 - **2026-11-09 合并 3 组（41 → 38）**，旧名已不存在，任何引用一律用新名：
   `winforms-desktop-app` + `wpf-realtime-sim` → **`dotnet-desktop-app`**
   （WPF 原文 → `references/wpf-realtime-dashboard.md`）

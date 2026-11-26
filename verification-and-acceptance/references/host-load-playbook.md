@@ -9,7 +9,8 @@ agent_created: true
 "5 个客户端全绿"**不能**推任何关于 1000 个客户端的结论。规模压测要回答的是另外几个问题：
 **无损吗？有背压吗？有泄漏吗？退出干净吗？以及 —— 这个脚本会不会恒绿？**
 
-> 前缀 `app-` = **上位机 / 服务端应用层**（非固件）。固件侧验收见 `embedded-verification-acceptance`；
+> 前缀 `app-` = **上位机 / 服务端应用层**（非固件）。固件侧验收见 `verification-and-acceptance`
+> 的 `references/embedded-acceptance-playbook.md`；
 > 被测服务本身的规模上限见 `app-select-relay-server`。
 
 ## 何时用

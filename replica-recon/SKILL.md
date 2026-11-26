@@ -7,7 +7,9 @@ agent_created: true
 # replica-recon · 复刻前的逆向取证
 
 > `replica-` 系列第 1 步。目标：**在写第一行实现代码之前，把"原件到底怎么做的"变成带证据等级的结论清单**。
-> 后续：`replica-memory-engine`（运行期引擎）· `replica-ui-fidelity`（界面复刻）· `replica-mock-harness`（替身验收）。
+> 摸清之后按原件形态分两条支线：**可运行时接管**（脚本/引擎类）走 `replica-runtime-takeover`；
+> **只能进程外读写**（原生 exe）走 `replica-memory-engine`。界面 `replica-ui-fidelity`、离线验收
+> `replica-mock-harness` 两条支线共用。
 
 ## 何时用
 

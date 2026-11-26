@@ -35,6 +35,16 @@ agent_created: true
 ## 固件侧硬判据
 
 - **构建**：Debug + Release **双构零警告**；显式给出 FLASH / RAM 字节数与占比。
+- **零警告的前提是"数得对"**：`-fsyntax-only` 扫不到只在代码生成阶段报的告警
+  （`-Wunused-but-set-variable`、`-Wuninitialized`、`'noreturn' function does return`）；
+  缺 include 路径还会先 fatal error，让统计结果看起来"很干净"。可信数字只能从**真实
+  `-c` 全量构建的输出**里数，且扫描参数要按各目标真实 include 路径给。
+- **故意演示的告警就近抑制**：`#pragma GCC diagnostic push/ignored/pop` 包住并写明原因，
+  不全局 `-w`。⚠️ `-Woverloaded-virtual` 的告警位置落在**基类成员**上，抑制区间必须从基类
+  定义之前开始，只包派生类不生效。
+- **增量正确性单独判**：同一源码连跑两遍，第二遍必须 **0 重链**。只看第一遍通过，会把
+  "每次全量重链"当成正常——链接照样成功，只是白干（多为产物名口径不一致，见
+  `embedded-windows-toolchain`）。
 - **烧录**：烧 **`.elf`**（`.bin` 会报 `no flash bank found` + `wrote 0 bytes`），见 `Verified OK`；
   改完代码**必须先重烧**再抓串口 —— 只 `reset` 会看到旧固件行为。
 - **「没报错 ≠ 有数据」**：调用返回 0、日志被限流都不算证据。取符号地址后直读内存比对预期值。

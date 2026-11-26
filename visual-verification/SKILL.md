@@ -54,6 +54,10 @@ agent_created: true
 - 比对前**先打印图像尺寸**：按缩略图尺寸裁会裁到空白、残差假性为 0。
 - Canvas 2D 的「确实更可见」要可复核：`getImageData` 量目标色曲线的纵向 `span`，
   判据用 `span/h` 比例；对比前先滑出环形缓冲历史。
+- **视口尺寸只能在启动参数里定**：`--window-size` 未必等于页面 `innerHeight`（无头模式会扣
+  装饰/缩放）。用调试协议（CDP `setDeviceMetricsOverride`）事后改尺寸，会把按启动尺寸算出的
+  布局与输入节奏打断 —— 表现为"按了十几次键仍停在初始画面"。先量一次真实的
+  `innerWidth/innerHeight`，把尺寸写进启动参数，再开始点击。
 
 ## Windows GUI 要点
 

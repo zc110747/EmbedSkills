@@ -2,14 +2,14 @@
 
 > 一位嵌入式固件工程师与 AI Agent 协作沉淀下来的 **Skill 库** —— 把「踩过的坑」写成 Agent 能直接调用的判据与配方。
 >
-> 当前 **38 个 Skill / 135 篇 references / 38 篇 SKILL.md（约 4490 行）/ 16726 行参考资料 / 11 个脚本**，全部 `agent_created: true`。
+> 当前 **39 个 Skill / 136 篇 references / 39 篇 SKILL.md（约 4616 行）/ 16811 行参考资料 / 11 个脚本**，全部 `agent_created: true`。
 >
 > ✅ 与本机 `~/.workbuddy/skills/` **已逐字节一致**（`bash sync_skills.sh --check` → `RESULT: IDENTICAL`）。
 > 提交前建议再跑一次 `python lint_skills.py`（结构一致性，见「怎么用 · 4」）。
 
 <p align="left">
-  <img alt="skills" src="https://img.shields.io/badge/Skills-38-2b6cb0">
-  <img alt="references" src="https://img.shields.io/badge/references-135-2f855a">
+  <img alt="skills" src="https://img.shields.io/badge/Skills-39-2b6cb0">
+  <img alt="references" src="https://img.shields.io/badge/references-136-2f855a">
   <img alt="scripts" src="https://img.shields.io/badge/scripts-11-805ad5">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-718096">
   <img alt="platform" src="https://img.shields.io/badge/platform-MCU%20%7C%20SOC%20%7C%20%E4%B8%8A%E4%BD%8D%E6%9C%BA-c05621">
@@ -55,7 +55,7 @@ EmbedSkills/
 
 | 层级 | 内容 | 何时加载 | 成本 |
 |---|---|---|---|
-| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 38 条 ≈ 3.1 K 字符 / **6.5 KB** |
+| **L1 · 常驻** | `name` + `description` | **每个会话自动注入** | 39 条 ≈ 3.2 K 字符 / **6.7 KB** |
 | **L2 · 按需** | `SKILL.md` 正文（目标 2~4 KB） | 触发词命中时 | 单篇 ≈ 1/5 上下文 |
 | **L3 · 精确** | `references/*.md` | 正文指向时才读那一篇 | 按需，通常 0 |
 
@@ -65,7 +65,9 @@ description 总量 26 KB → 约 3 KB；2026-10-19 把 42 条全部压到 ≤150
 **46 → 41 个**（合并 5 组同源 skill），description 从「功能清单堆砌」改写为
 「机制 + 症状」，41 条实测 **3,400 字符 / 7.1 KB**，最长 117、平均 82，全部 ≤120 字符；
 2026-11-09 **41 → 38 个**（再合并 3 组同源 skill，正文按"只留判据、细节下沉"重写），
-38 条 description 合计 **3,119 字符 / 6.5 KB**，平均 82、最长 117。
+38 条 description 合计 **3,119 字符 / 6.5 KB**，平均 82、最长 117；2026-11-26 **38 → 39 个**
+（新增「原版运行时接管」，同时把最近项目的硬经验回填到 5 篇既有 skill），
+39 条合计 **3,184 字符 / 6.7 KB**，平均 82、最长 117。
 
 ---
 
@@ -168,11 +170,12 @@ description 总量 26 KB → 约 3 KB；2026-10-19 把 42 条全部压到 ≤150
 | [`dotnet-desktop-app`](dotnet-desktop-app/SKILL.md) | .NET 桌面（WinForms/WPF）：自绘控件 DPI 与裁剪、NAudio 3.x 与无音频设备、同一 exe 兼作 CLI（`AttachConsole` 顺序）、实时曲线固定步长与不重建视觉树、离屏 PNG 验图 | 「WinForms 自绘控件」「WPF 实时看板」「GUI 当 CLI 用」 |
 | [`piper-offline-tts`](piper-offline-tts/SKILL.md) | Piper 本地离线 TTS 集成：CLI 契约（正文走 **stdin**、`-f` 出 WAV）、长文本实测能力、喂 TTS 前的文本准备（章节抽取 / 仅接受 UTF-8 / 非目标语言闸门）、模型哈希与许可核对、WAV 原子落地 | 「本地 TTS」「Markdown 转语音」「模型哈希核对」 |
 
-### 复刻（逆向 → 替身 → 复现）（4）
+### 复刻（逆向 → 接管/替身 → 复现）（5）
 
 | Skill | 解决什么 | 典型触发 |
 |---|---|---|
 | [`replica-recon`](replica-recon/SKILL.md) | 复刻第一步**逆向取证**：确认原件身份与版本、PE/容器静态解析、资源与字符串挖掘、行为观察，每条结论按**证据强度**分级 | 「复刻某工具先摸清它怎么做的」 |
+| [`replica-runtime-takeover`](replica-runtime-takeover/SKILL.md) | **接管原版运行时**做新渲染层：唯一改名 + 同名 shim（闭包内函数只能这么拦）、输入消息桥与定点坐标换算、协程等待注入、状态单一真值、规则零复制与可逆还原 | 「原版规则不能重写，只想换 3D 渲染」「接管后画面被切回旧界面」 |
 | [`replica-memory-engine`](replica-memory-engine/SKILL.md) | 从外部读写目标进程内存的引擎：符号解析、AOB 签名扫描（通配展开 / 越界钳制 / 全量校验）、多级指针链、位域读写、代码洞与跳板 hook、x64 指令长度解码 | 「AOB 一条都命中不了」「指针链走到一半变空」 |
 | [`replica-mock-harness`](replica-mock-harness/SKILL.md) | **没有目标程序时的验收**：自研替身进程验证「读地址→指针链→写值→回读」整条接线，PASS/FAIL/SKIP 三分类把「环境缺位点」与「接线坏了」分开，SKIP 清单即真机补验 TODO | 「替身进程怎么造」「验收脚本总报 FAIL」 |
 | [`replica-ui-fidelity`](replica-ui-fidelity/SKILL.md) | 从参考截图**逐像素反推**复刻界面：布局度量标定、DPI 缩放、字号实测标定、色值采样、自绘控件与真实子窗口遮挡、像素级复验 | 「照着截图把界面做出来」「DPI 缩放后全错位」 |
@@ -226,7 +229,7 @@ Skill 之间**显式互相引用**，常用组合：
 | **改机构参数前** | `model-truth-and-sim`（量真值 + 防漂移） → `robotics-link-diagnostics`（验链路） |
 | **做一个上位机网络服务** | `app-cpp20-coroutine-runtime`（事件循环若是协程调度器） → `app-select-relay-server`（规模上限与运维契约） → `verification-and-acceptance`（压测验收） |
 | **服务「客户端一多就丢数据」** | `app-select-relay-server`（`FD_SET` 截断 / `backlog`） → `verification-and-acceptance`（复现 + 负向对照） |
-| **要复刻一个外部工具** | `replica-recon`（先摸清它怎么做的） → `replica-memory-engine`（读写引擎） → `replica-mock-harness`（没原件就造替身验收） → `replica-ui-fidelity`（界面 1:1） |
+| **要复刻一个外部工具** | `replica-recon`（先摸清它怎么做的） → 按原件形态二选一：`replica-runtime-takeover`（脚本/引擎，接管运行时）或 `replica-memory-engine`（原生 exe，进程外读写） → `replica-mock-harness`（没原件就造替身验收） → `replica-ui-fidelity`（界面 1:1） |
 | **把一个静态站做成多端 App** | `web-static-site-pipeline`（站本体与缓存） → `web-local-progress-store`（本地状态与导出契约） → `app-webview-shell`（桌面/手机外壳） → `android-apk-no-gradle`（出安装包） |
 
 ---
@@ -471,6 +474,20 @@ python lint_skills.py            # 结构一致性校验（frontmatter / ≤150 
         （平均 82、最长 117，全部 ≤120）
       - 退役 6 个旧目录到 `~/.workbuddy/skills.retired-20261109/`，
         合并前整份备份到 `~/.workbuddy/skills.bak-20261109/`
+
+- [x] **2026-11-26** 从最近项目回填（**38 → 39 个 Skill / 135 → 136 篇 references**）
+      - 新增 `replica-runtime-takeover`：原版规则零复制地做新渲染层 —— 闭包内函数只能用
+        「全局唯一改名 + 同名 shim」拦截、输入消息桥与定点坐标换算、协程等待临时注入、
+        状态单一真值与切换幂等、可逆还原（逐字节）判据
+      - 回填 5 篇既有 skill（只加判据，不重写结构）：
+        - `stm32-peripherals-and-memory` — MSC+CDC 复合设备四条硬约束 + 新
+          `references/usb-composite-msc-cdc.md`（十条坑、上电顺序、FS 吞吐基线）
+        - `embedded-windows-toolchain` — MinGW `$(EXEEXT)` 导致**每次重链**（含 `mv` 第二成因）、
+          PATH 中旧 g++ 抢占、`test -f` 命中 `.exe`
+        - `verification-and-acceptance` — 可信告警数必须来自真实 `-c` 构建、两遍构建 0 重链
+        - `web-static-site-pipeline` — md/html/wav 三向对应、同名同正文硬停点、词形误报
+        - `visual-verification` — 视口尺寸只能在启动参数里定（CDP 覆写会打断输入节奏）
+      - 39 条 description 合计 **3,184 字符 / 6.7 KB**（平均 82、最长 117，全部 ≤120）
 
 ### 进行中 / 计划
 

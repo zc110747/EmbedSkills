@@ -1,4 +1,4 @@
-# Skills 索引（全局 `~/.workbuddy/skills/`，本表列 38 个）
+# Skills 索引（全局 `~/.workbuddy/skills/`，本表列 39 个）
 
 > **每个 skill 的 name + description 由宿主每会话自动注入**，本表只是速查索引，不重复描述。
 > 细节一律放各 skill 的 `references/`，**按需读取，不占常驻上下文**。
@@ -72,11 +72,12 @@
 
 > 多客户端规模压测与验收统一走 `verification-and-acceptance`（含 harness 骨架、场景矩阵、负向对照）。
 
-## 复刻（逆向 → 替身 → 复现）（4）
+## 复刻（逆向 → 接管 / 替身 → 复现）（5）
 
 | Skill | 一句话 |
 |---|---|
 | `replica-recon` | 复刻第一步逆向取证：原件身份与版本、PE/容器静态解析、资源与字符串挖掘、行为观察，结论按证据强度分级 |
+| `replica-runtime-takeover` | 接管原版运行时做新渲染层：闭包内函数只能用「全局唯一改名 + 同名 shim」拦、输入消息桥与定点坐标换算、协程等待临时注入、状态单一真值、规则零复制与可逆还原 |
 | `replica-memory-engine` | 外部读写目标进程内存的引擎：符号解析、AOB 签名扫描、多级指针链、位域读写、写后回读、代码洞与跳板 hook、x64 指令长度解码 |
 | `replica-mock-harness` | 替身进程验收：没有目标程序时验证「读地址→指针链→写值→回读」整条接线，PASS/FAIL/SKIP 三分类把「环境缺位点」与「接线坏了」分开 |
 | `replica-ui-fidelity` | 从参考截图逐像素反推复刻界面：布局度量标定、DPI 缩放、字号实测标定、色值采样、自绘控件与真实子窗口遮挡、像素级复验 |
@@ -154,3 +155,8 @@
   细节下沉 `references/`（130 → **135** 篇，零删除）。`soc-video-and-edge-ai` 的
   `references/video-server.md` 更名 `streaming-server.md`。旧目录退役到
   `~/.workbuddy/skills.retired-20261109/`，备份 `~/.workbuddy/skills.bak-20261109/`。
+- **2026-11-26（最近项目回填）**：**38 → 39**，新增 `replica-runtime-takeover`
+  （原版运行时接管：改名 + 同名 shim、输入桥与定点坐标、协程等待注入、可逆还原）；
+  同时回填 5 篇既有 skill 的硬判据（USB 复合设备、MinGW `$(EXEEXT)` 增量重链、
+  可信告警数、内容三向对应、无头视口尺寸），references 135 → **136**。
+  39 条 description 合计 3,184 字符 / 6.7 KB。
